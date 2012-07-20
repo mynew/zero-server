@@ -19162,3 +19162,184 @@ bool Player::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex
     }
     return Unit::IsImmuneToSpellEffect(spellInfo, index);
 }
+
+void Player::HandlePvPKill()
+{
+    uint32 uStartTime = WorldTimer::getMSTime();
+    KillStreak = 0;
+    uint32 loopCount = 0;
+    uint32 victimHealth = 0;
+    uint32 rewardgold = 10000;
+    uint64 maxdamagerGuid = 0;
+    uint64 maxdamagerDmg = 0;
+
+    for (std::map<uint64, DamageHealData*>::iterator itr = m_DamagersAndHealers.begin(); itr != m_DamagersAndHealers.end(); ++itr)
+    {
+        if (itr->second->damage > 0)
+        {
+            victimHealth += itr->second->damage;
+
+            if (itr->second->damage > maxdamagerDmg)
+            {
+                maxdamagerDmg = itr->second->damage;
+                maxdamagerGuid = itr->first;
+            }
+        }
+    }
+
+    for (std::map<uint64, DamageHealData*>::iterator itr = m_DamagersAndHealers.begin(); itr != m_DamagersAndHealers.end(); ++itr)
+    {
+        if (itr->second->damage > 0)
+        {
+            ++loopCount;
+            Player* pAttacker = sObjectMgr.GetPlayer(itr->first);
+            float killstreakMod = (float(pAttacker->KillStreak)/10)+1.0f;
+            ++pAttacker->KillStreak;
+
+            if (pAttacker->HandlePvPAntifarm(this))
+            {
+                uint32 attackerHealing = 0;
+                float damagePct = float(itr->second->damage) / float(victimHealth);
+                float attackerReward = (float(rewardgold) * damagePct)*killstreakMod;
+                pAttacker->ModifyMoney(+int32(attackerReward));
+
+                ChatHandler(pAttacker).PSendSysMessage("%s[PvP System]%s You got awarded %g gold for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attackerReward/10000.f,GetNameLink().c_str());
+
+                for (std::map<uint64, DamageHealData*>::iterator itr = pAttacker->m_DamagersAndHealers.begin(); itr != pAttacker->m_DamagersAndHealers.end(); ++itr)
+                {
+                    if (itr->second->healing > 0)
+                    {
+                        attackerHealing += itr->second->healing;
+                    }
+                }
+
+                for (std::map<uint64, DamageHealData*>::iterator itr = pAttacker->m_DamagersAndHealers.begin(); itr != pAttacker->m_DamagersAndHealers.end(); ++itr)
+                {
+                    if (itr->second->healing > 0)
+                    {
+                        ++loopCount;
+                        Player* pHealer = sObjectMgr.GetPlayer(itr->first);
+                        float killstreakMod = (float(pHealer->KillStreak)/10)+1.0f;
+                        ++pHealer->KillStreak;
+
+                        float healingPct = float(itr->second->healing) / float(attackerHealing);
+                        float maxhealingPct = (float(itr->second->healing)/float(pAttacker->GetMaxHealth()));
+                        if (maxhealingPct > 1)
+                            maxhealingPct = 1.0f;
+                        float healerReward = ((float(attackerReward) * healingPct)*maxhealingPct)*killstreakMod;
+
+                        pHealer->ModifyMoney(+int32(healerReward));
+
+                        ChatHandler(pHealer).PSendSysMessage("%s[PvP System]%s You got awarded %g gold for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,healerReward/10000.f,pAttacker->GetNameLink().c_str());
+                    }
+                }
+            }
+        }
+    }
+    if (loopCount > 1)
+        ChatHandler(this).PSendSysMessage("%s[PvP System]%s It took %u people to kill you",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,loopCount);
+
+    Player* pMostDamager = sObjectMgr.GetPlayer(maxdamagerGuid);
+
+    if (pMostDamager)
+    {
+        ChatHandler(this).PSendSysMessage("%s[PvP System]%s Your main attacker was %s%s who did %u damage to you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE,maxdamagerDmg);
+
+        if (KillBounty > 0)
+        {
+            ChatHandler(pMostDamager).PSendSysMessage("%s[PvP System]%s You killed %s and got awarded with the bounty on his head, which was %g",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetNameLink(),float(KillBounty)/10000.0f);
+            pMostDamager->ModifyMoney(int32(KillBounty));
+        }
+
+    }
+
+
+
+    uint32 uPvPRunTime = WorldTimer::getMSTimeDiff(uStartTime, WorldTimer::getMSTime());
+    sLog.outDebug("Took %u MS to run PvP System",uPvPRunTime);
+}
+
+bool Player::HandlePvPAntifarm(Player* victim)
+{
+    bool sendInfo = true;
+    if (!isGameMaster() && !victim->isGameMaster())
+    {
+        if (this == victim)
+            return false;
+        else if (victim->HasAura(2479))
+        {
+            if (sendInfo)
+                ChatHandler(this).PSendSysMessage("%s[PvP System]%s Hes not worth money or honor yet!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+            return false;
+        }
+        else if (GetSession()->GetRemoteAddress() == victim->GetSession()->GetRemoteAddress())
+        {
+            if (sendInfo)
+            {
+                ChatHandler(this).PSendSysMessage("%s[Anti Farming System]%s You have same ip as your victim", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
+                ChatHandler(this).PSendSysMessage("%sthis means you are on same network and could farm money together.", MSG_COLOR_WHITE);
+            }
+            return false;
+        }
+        else if (victim->GetObjectGuid().GetRawValue() == ALastGuid)
+        {
+            ++ALastGuidCount;
+            if (ALastGuidCount >= 6)
+            {
+                if (sendInfo)
+                    ChatHandler(this).PSendSysMessage("%s[Anti Farming System]%s You don't get awarded for killing a player more than 6 times in a row!.", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
+                return false;
+            }
+        }
+        else if (GetObjectGuid().GetRawValue() == victim->VLastGuid)
+        {
+            ++victim->VLastGuidCount;
+            if (victim->VLastGuidCount >= 6)
+            {
+                if (sendInfo)
+                    ChatHandler(this).PSendSysMessage("%s[Anti Farming System]%s You don't get awarded for killing a player more than 6 times in a row!.", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
+                return false;
+            }
+        }
+        else
+        {
+            ALastGuidCount = 0;
+            victim->VLastGuidCount = 0;
+        }
+    }
+    ALastGuid = victim->GetObjectGuid();    // Set attackers last kill guid to victim's guid
+    victim->VLastGuid = GetObjectGuid();    // Set victims last killed guid to attacker's guid
+    return true;
+}
+
+bool Player::AddAura(uint32 spellID)
+{
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellID);
+    if (!spellInfo)
+        return false;
+
+    if (!IsSpellAppliesAura(spellInfo, (1 << EFFECT_INDEX_0) | (1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_2)) &&
+        !IsSpellHaveEffect(spellInfo, SPELL_EFFECT_PERSISTENT_AREA_AURA))
+    {
+        return false;
+    }
+
+    SpellAuraHolder *holder = CreateSpellAuraHolder(spellInfo, this, m_session->GetPlayer());
+
+    for(uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        uint8 eff = spellInfo->Effect[i];
+        if (eff>=TOTAL_SPELL_EFFECTS)
+            continue;
+        if (IsAreaAuraEffect(eff)           ||
+            eff == SPELL_EFFECT_APPLY_AURA  ||
+            eff == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+        {
+            Aura *aur = CreateAura(spellInfo, SpellEffectIndex(i), NULL, holder, this);
+            holder->AddAura(aur, SpellEffectIndex(i));
+        }
+    }
+    AddSpellAuraHolder(holder);
+
+    return true;
+}
