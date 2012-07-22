@@ -356,6 +356,15 @@ UpdateMask Player::updateVisualBits;
 
 Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m_reputationMgr(this)
 {
+    /* PvP System Begin */
+    KillStreak        = 0;
+    ALastGuid         = 0;
+    ALastGuidCount    = 0;
+    VLastGuid         = 0;
+    VLastGuidCount    = 0;
+    KillBounty        = 0;
+    /* PvP System End */
+
     m_transport = 0;
 
     m_speakTime = 0;
@@ -1077,6 +1086,11 @@ void Player::Update( uint32 update_diff, uint32 p_time )
 {
     if(!IsInWorld())
         return;
+
+    if (GetZoneId() == 440 && GetAreaId() == 2317)
+    {
+        SetPvP(false);
+    }
 
     // undelivered mail
     if(m_nextMailDelivereTime && m_nextMailDelivereTime <= time(NULL))
