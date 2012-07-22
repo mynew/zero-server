@@ -1090,6 +1090,8 @@ void Player::Update( uint32 update_diff, uint32 p_time )
     if (GetZoneId() == 440 && GetAreaId() == 2317)
     {
         SetPvP(false);
+        if (isDead())
+            ResurrectPlayer(1.0f,false);
     }
 
     // undelivered mail
