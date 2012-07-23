@@ -5195,8 +5195,8 @@ int32 Unit::DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellPro
 {
     int32 gain = pVictim->ModifyHealth(int32(addhealth));
 
-    if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim)
-        pVictim->ToPlayer()->DamagedOrHealed(GetObjectGuid(), 0, gain);
+    if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim && gain > 0)
+        pVictim->ToPlayer()->DamagedOrHealed(GetObjectGuid(), 0, uint32(gain));
 
     if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->AI())
         ((Creature*)pVictim)->AI()->HealBy(this, addhealth);
