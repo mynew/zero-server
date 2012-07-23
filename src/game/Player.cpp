@@ -19359,3 +19359,18 @@ bool Player::AddAura(uint32 spellID)
 
     return true;
 }
+
+void Player::DamagedOrHealed(uint64 guid, uint32 damage, uint32 heal)
+{
+    Player *pPlayer = sObjectMgr.GetPlayer(guid);
+
+    DamageHealData *data = m_DamagersAndHealers[guid];
+
+    if(!data)
+    {
+        data = new DamageHealData();
+        m_DamagersAndHealers[guid] = data;
+    }
+    data->damage += damage;
+    data->healing += heal;
+}
