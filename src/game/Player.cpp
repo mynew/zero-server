@@ -364,7 +364,7 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
     VLastGuidCount    = 0;
     KillBounty        = 0;
     /* PvP System End */
-    KalimdorCoins     = 0;
+    KalimdorCoins     = 0.0f;
 
     m_transport = 0;
 
@@ -15044,6 +15044,7 @@ bool Player::_LoadHomeBind(QueryResult *result)
 
 void Player::SaveToDB()
 {
+    CharacterDatabase.PExecute("DELETE FROM character_custom WHERE guid = %u",GetGUIDLow());
     CharacterDatabase.PExecute("INSERT INTO character_custom VALUES (%u,%f)",GetGUIDLow(),KalimdorCoins);
     // we should assure this: ASSERT((m_nextSave != sWorld.getConfig(CONFIG_UINT32_INTERVAL_SAVE)));
     // delay auto save at any saves (manual, in code, or autosave)
@@ -19194,7 +19195,7 @@ void Player::HandlePvPKill()
     KillStreak = 0;
     uint32 loopCount = 0;
     uint32 victimHealth = 0;
-    float  rewardcoins = 1;
+    float  rewardcoins = 1.0f;
     uint64 maxdamagerGuid = 0;
     uint64 maxdamagerDmg = 0;
 
@@ -19229,7 +19230,7 @@ void Player::HandlePvPKill()
 
                 pAttacker->KalimdorCoins += attackerReward;
 
-                ChatHandler(pAttacker).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attackerReward/10000.f,GetNameLink().c_str());
+                ChatHandler(pAttacker).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attackerReward,GetNameLink().c_str());
 
                 for (std::map<uint64, DamageHealData*>::iterator itr = pAttacker->m_DamagersAndHealers.begin(); itr != pAttacker->m_DamagersAndHealers.end(); ++itr)
                 {
@@ -19256,7 +19257,7 @@ void Player::HandlePvPKill()
 
                         pHealer->KalimdorCoins += healerReward;
 
-                        ChatHandler(pHealer).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,healerReward/10000.f,pAttacker->GetNameLink().c_str());
+                        ChatHandler(pHealer).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,healerReward,pAttacker->GetNameLink().c_str());
                     }
                 }
             }
