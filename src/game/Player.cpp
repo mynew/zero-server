@@ -364,6 +364,7 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
     VLastGuidCount    = 0;
     KillBounty        = 0;
     /* PvP System End */
+    KalimdorCoins     = 0.0f;
 
     m_transport = 0;
 
@@ -13556,6 +13557,12 @@ void Player::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 cou
 
 bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder )
 {
+    QueryResult *result_c = CharacterDatabase.PQuery("SELECT kalimdorcoins FROM character_custom WHERE guid = %u",GetObjectGuid().GetRawValue());
+    if(result_c)
+    {
+        Field *fields_c = result_c->Fetch();
+        KalimdorCoins = fields_c[1].GetFloat();
+    }
     //       0     1        2     3     4      5       6      7   8      9            10            11
     //SELECT guid, account, name, race, class, gender, level, xp, money, playerBytes, playerBytes2, playerFlags,"
     // 12          13          14          15   16           17        18         19         20         21          22           23                 24
@@ -15036,6 +15043,7 @@ bool Player::_LoadHomeBind(QueryResult *result)
 
 void Player::SaveToDB()
 {
+    CharacterDatabase.PExecute("INSERT INTO character_custom VALUES (%u,%f)",GetObjectGuid().GetRawValue(),KalimdorCoins);
     // we should assure this: ASSERT((m_nextSave != sWorld.getConfig(CONFIG_UINT32_INTERVAL_SAVE)));
     // delay auto save at any saves (manual, in code, or autosave)
     m_nextSave = sWorld.getConfig(CONFIG_UINT32_INTERVAL_SAVE);
@@ -19185,7 +19193,7 @@ void Player::HandlePvPKill()
     KillStreak = 0;
     uint32 loopCount = 0;
     uint32 victimHealth = 0;
-    uint32 rewardgold = 10000;
+    float  rewardcoins = 1;
     uint64 maxdamagerGuid = 0;
     uint64 maxdamagerDmg = 0;
 
@@ -19216,10 +19224,11 @@ void Player::HandlePvPKill()
             {
                 uint32 attackerHealing = 0;
                 float damagePct = float(itr->second->damage) / float(victimHealth);
-                float attackerReward = (float(rewardgold) * damagePct)*killstreakMod;
-                pAttacker->ModifyMoney(+int32(attackerReward));
+                float attackerReward = (rewardcoins * damagePct)*killstreakMod;
 
-                ChatHandler(pAttacker).PSendSysMessage("%s[PvP System]%s You got awarded %g gold for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attackerReward/10000.f,GetNameLink().c_str());
+                pAttacker->KalimdorCoins += attackerReward;
+
+                ChatHandler(pAttacker).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attackerReward/10000.f,GetNameLink().c_str());
 
                 for (std::map<uint64, DamageHealData*>::iterator itr = pAttacker->m_DamagersAndHealers.begin(); itr != pAttacker->m_DamagersAndHealers.end(); ++itr)
                 {
@@ -19242,11 +19251,11 @@ void Player::HandlePvPKill()
                         float maxhealingPct = (float(itr->second->healing)/float(pAttacker->GetMaxHealth()));
                         if (maxhealingPct > 1)
                             maxhealingPct = 1.0f;
-                        float healerReward = ((float(attackerReward) * healingPct)*maxhealingPct)*killstreakMod;
+                        float healerReward = ((attackerReward * healingPct)*maxhealingPct)*killstreakMod;
 
-                        pHealer->ModifyMoney(+int32(healerReward));
+                        pHealer->KalimdorCoins += healerReward;
 
-                        ChatHandler(pHealer).PSendSysMessage("%s[PvP System]%s You got awarded %g gold for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,healerReward/10000.f,pAttacker->GetNameLink().c_str());
+                        ChatHandler(pHealer).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,healerReward/10000.f,pAttacker->GetNameLink().c_str());
                     }
                 }
             }
@@ -19258,18 +19267,7 @@ void Player::HandlePvPKill()
     Player* pMostDamager = sObjectMgr.GetPlayer(maxdamagerGuid);
 
     if (pMostDamager)
-    {
         ChatHandler(this).PSendSysMessage("%s[PvP System]%s Your main attacker was %s%s who did %u damage to you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE,maxdamagerDmg);
-
-        if (KillBounty > 0)
-        {
-            ChatHandler(pMostDamager).PSendSysMessage("%s[PvP System]%s You killed %s and got awarded with the bounty on his head, which was %g",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetNameLink(),float(KillBounty)/10000.0f);
-            pMostDamager->ModifyMoney(int32(KillBounty));
-        }
-
-    }
-
-
 
     uint32 uPvPRunTime = WorldTimer::getMSTimeDiff(uStartTime, WorldTimer::getMSTime());
     sLog.outDebug("Took %u MS to run PvP System",uPvPRunTime);
