@@ -364,7 +364,7 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
     VLastGuidCount    = 0;
     KillBounty        = 0;
     /* PvP System End */
-    KalimdorCoins     = 0.0f;
+    KalimdorCoins     = 0;
 
     m_transport = 0;
 
@@ -14088,6 +14088,13 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder )
                     SetAcceptWhispers(true);
                 break;
         }
+    }
+
+    QueryResult* c_result = CharacterDatabase.PQuery("SELECT kalimdorcoins FROM character_custom WHERE guid = '%u'",GetGUIDLow());
+    if (c_result)
+    {
+        Field* c_fields = c_result->Fetch();
+        KalimdorCoins           = c_fields[0].GetFloat();
     }
 
     return true;
