@@ -13561,7 +13561,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder )
     if(result_c)
     {
         Field *fields_c = result_c->Fetch();
-        KalimdorCoins = fields_c[1].GetFloat();
+        KalimdorCoins = fields_c[0].GetFloat();
     }
     //       0     1        2     3     4      5       6      7   8      9            10            11
     //SELECT guid, account, name, race, class, gender, level, xp, money, playerBytes, playerBytes2, playerFlags,"
