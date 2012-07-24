@@ -15044,7 +15044,7 @@ bool Player::_LoadHomeBind(QueryResult *result)
 
 void Player::SaveToDB()
 {
-    CharacterDatabase.PExecute("INSERT INTO character_custom VALUES (%u,%f)",GetObjectGuid().GetRawValue(),KalimdorCoins);
+    CharacterDatabase.PExecute("INSERT INTO character_custom VALUES (%u,%f)",GetGUIDLow(),KalimdorCoins);
     // we should assure this: ASSERT((m_nextSave != sWorld.getConfig(CONFIG_UINT32_INTERVAL_SAVE)));
     // delay auto save at any saves (manual, in code, or autosave)
     m_nextSave = sWorld.getConfig(CONFIG_UINT32_INTERVAL_SAVE);
