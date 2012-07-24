@@ -13557,12 +13557,6 @@ void Player::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 cou
 
 bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder )
 {
-    QueryResult *result_c = CharacterDatabase.PQuery("SELECT kalimdorcoins FROM character_custom WHERE guid = %u",GetObjectGuid().GetRawValue());
-    if(result_c)
-    {
-        Field *fields_c = result_c->Fetch();
-        KalimdorCoins = fields_c[0].GetFloat();
-    }
     //       0     1        2     3     4      5       6      7   8      9            10            11
     //SELECT guid, account, name, race, class, gender, level, xp, money, playerBytes, playerBytes2, playerFlags,"
     // 12          13          14          15   16           17        18         19         20         21          22           23                 24
