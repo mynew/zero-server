@@ -4895,3 +4895,10 @@ bool ChatHandler::HandleWaterwalkCommand(char* args)
         ChatHandler(player).PSendSysMessage(LANG_YOUR_WATERWALK_SET, args, GetNameLink().c_str());
     return true;
 }
+
+bool ChatHandler::HandleCoinsCommand(char* /*args*/)
+{
+    Player* pPlayer = m_session->GetPlayer();
+    PSendSysMessage("%sYou have %s%g%s KalimdorCoins!",MSG_COLOR_WHITE,MSG_COLOR_RED,pPlayer->KalimdorCoins,MSG_COLOR_WHITE);
+    return true;
+}
