@@ -4914,12 +4914,12 @@ bool ChatHandler::HandleToggleBuyCommand(char* /*args*/)
     if (pPlayer->BuyEnabled)
     {
         PSendSysMessage("You can now buy KalimdorCoin items now.");
-        pPlayer->BuyEnabled = true;
+        pPlayer->BuyEnabled = false;
     }
     else
     {
         PSendSysMessage("You cannot buy KalimdorCoin items now.");
-        pPlayer->BuyEnabled = false;
+        pPlayer->BuyEnabled = true;
     }
     return true;
 }
