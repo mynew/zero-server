@@ -1446,6 +1446,10 @@ bool ChatHandler::HandleNpcAddVendorItemCommand(char* args)
     if (!ExtractOptUInt32(&args, incrtime, 0))
         return false;
 
+    uint32 kalimdorcoins;
+    if (!ExtractOptUInt32(&args, kalimdorcoins, 0))
+        return false;
+
     Creature* vendor = getSelectedCreature();
 
     uint32 vendor_entry = vendor ? vendor->GetEntry() : 0;
@@ -1456,11 +1460,12 @@ bool ChatHandler::HandleNpcAddVendorItemCommand(char* args)
         return false;
     }
 
-    sObjectMgr.AddVendorItem(vendor_entry,itemId,maxcount,incrtime);
+    sObjectMgr.AddVendorItem(vendor_entry,itemId,maxcount,incrtime,kalimdorcoins);
 
     ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemId);
 
     PSendSysMessage(LANG_ITEM_ADDED_TO_LIST,itemId,pProto->Name1,maxcount,incrtime);
+    PSendSysMessage("Kalimdorcoins %u",kalimdorcoins);
     return true;
 }
 
