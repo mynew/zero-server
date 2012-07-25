@@ -16909,9 +16909,9 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         return false;
     }
 
-    if (KalimdorCoins > 0 && !BuyEnabled)
+    if (crItem->kalimdorcoins > 0 && !BuyEnabled)
     {
-        ChatHandler(this).PSendSysMessage("This item costs %u KalimdorCoins, to buy it you must type .togglebuy",KalimdorCoins);
+        ChatHandler(this).PSendSysMessage("This item costs %u KalimdorCoins, to buy it you must type .togglebuy",crItem->kalimdorcoins);
         return false;
     }
 
