@@ -563,6 +563,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleStableCommand(char* args);
         bool HandleWaterwalkCommand(char* args);
         bool HandleCoinsCommand(char* args);
+        bool HandleToggleBuyCommand(char* args);
         bool HandleQuitCommand(char* args);
 
         //! Development Commands

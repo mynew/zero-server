@@ -708,7 +708,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "repairitems",    SEC_GAMEMASTER,     true,  &ChatHandler::HandleRepairitemsCommand,         "", NULL },
         { "stable",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleStableCommand,              "", NULL },
         { "waterwalk",      SEC_GAMEMASTER,     false, &ChatHandler::HandleWaterwalkCommand,           "", NULL },
-        { "coins",          SEC_PLAYER,         true,  &ChatHandler::HandleCoinsCommand,          "", NULL },
+        { "coins",          SEC_PLAYER,         true,  &ChatHandler::HandleCoinsCommand,               "", NULL },
+        { "togglebuy",      SEC_PLAYER,         true,  &ChatHandler::HandleToggleBuyCommand,           "", NULL },
         { "quit",           SEC_CONSOLE,        true,  &ChatHandler::HandleQuitCommand,                "", NULL },
 
         { NULL,             0,                  false, NULL,                                           "", NULL }

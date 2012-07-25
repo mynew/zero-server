@@ -4902,3 +4902,19 @@ bool ChatHandler::HandleCoinsCommand(char* /*args*/)
     PSendSysMessage("%sYou have %s%g%s KalimdorCoins!",MSG_COLOR_WHITE,MSG_COLOR_RED,pPlayer->KalimdorCoins,MSG_COLOR_WHITE);
     return true;
 }
+
+bool ChatHandler::HandleToggleBuyCommand(char* /*args*/)
+{
+    Player* pPlayer = m_session->GetPlayer();
+    if (pPlayer->BuyEnabled)
+    {
+        PSendSysMessage("You can now buy KalimdorCoin items now.");
+        pPlayer->BuyEnabled = true;
+    }
+    else
+    {
+        PSendSysMessage("You cannot buy KalimdorCoin items now.");
+        pPlayer->BuyEnabled = false;
+    }
+    return true;
+}

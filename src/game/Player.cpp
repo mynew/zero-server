@@ -365,6 +365,7 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
     KillBounty        = 0;
     /* PvP System End */
     KalimdorCoins     = 0.0f;
+    BuyEnabled        = false;
 
     m_transport = 0;
 
@@ -16908,6 +16909,18 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         return false;
     }
 
+    if (KalimdorCoins > 0 && !BuyEnabled)
+    {
+        ChatHandler(this).PSendSysMessage("This item costs %u KalimdorCoins, to buy it you must type .togglebuy",KalimdorCoins);
+        return false;
+    }
+
+    if (KalimdorCoins < crItem->kalimdorcoins)
+    {
+        ChatHandler(this).PSendSysMessage("You do not have enough KalimdorCoins to buy this item.");
+        return false;
+    }
+
     Item* pItem = NULL;
 
     if ((bag == NULL_BAG && slot == NULL_SLOT) || IsInventoryPos(bag, slot))
@@ -16921,6 +16934,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         }
 
         ModifyMoney(-int32(price));
+        KalimdorCoins -= crItem->kalimdorcoins;
 
         pItem = StoreNewItem(dest, item, true);
     }

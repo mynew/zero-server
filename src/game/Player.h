@@ -864,6 +864,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 KillBounty;
         /* PvP System End */
         float KalimdorCoins;
+        bool BuyEnabled;
 
         void HandlePvPKill();
         bool HandlePvPAntifarm(Player* victim);
