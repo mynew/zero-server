@@ -4934,7 +4934,8 @@ bool ChatHandler::HandleGoldPriceCommand(char* args)
     if (!ExtractOptUInt32(&args, goldprice, 0))
         return false;
 
-    WorldDatabase.PExecute("UPDATE item_template SET BuyPrice = %u,SellPrice = %u WHERE entry = %u",goldprice,goldprice/4,itemId);
+    WorldDatabase.PExecute("UPDATE item_template SET BuyPrice = %u,SellPrice = %u WHERE entry = %u",goldprice*10000,(goldprice*10000)/4,itemId);
+    PSendSysMessage("Updated gold price to %u on item with id %u",goldprice*10000,itemId);
     return true;
 }
 
@@ -4950,5 +4951,6 @@ bool ChatHandler::HandleKalimdorPriceCommand(char* args)
 
     WorldDatabase.PExecute("UPDATE npc_vendor SET kalimdorcoins = %u WHERE item = %u",kalimdorprice,itemId);
     WorldDatabase.PExecute("UPDATE npc_vendor_template SET kalimdorcoins = %u WHERE item = %u",kalimdorprice,itemId);
+    PSendSysMessage("Updated kalimdor price to %u on item with id %u",kalimdorprice,itemId);
     return true;
 }
