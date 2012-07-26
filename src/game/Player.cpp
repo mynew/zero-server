@@ -1095,6 +1095,8 @@ void Player::Update( uint32 update_diff, uint32 p_time )
         if (isDead())
             ResurrectPlayer(1.0f,false);
     }
+    else if ((GetAreaId() == 1741 || GetAreaId() == 2177) && GetPositionZ() < 21)
+        NearTeleportTo(GetPositionX(),GetPositionY(),33.5f,GetOrientation(),true);
 
     // undelivered mail
     if(m_nextMailDelivereTime && m_nextMailDelivereTime <= time(NULL))
