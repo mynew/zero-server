@@ -4926,12 +4926,12 @@ bool ChatHandler::HandleToggleBuyCommand(char* /*args*/)
 
 bool ChatHandler::HandleGoldPriceCommand(char* args)
 {
-    uint32 itemId;
-    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemId))
-        return false;
-
     uint32 goldprice;
     if (!ExtractOptUInt32(&args, goldprice, 0))
+        return false;
+
+    uint32 itemId;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemId))
         return false;
 
     WorldDatabase.PExecute("UPDATE item_template SET BuyPrice = %u,SellPrice = %u WHERE entry = %u",goldprice*10000,(goldprice*10000)/4,itemId);
@@ -4941,12 +4941,12 @@ bool ChatHandler::HandleGoldPriceCommand(char* args)
 
 bool ChatHandler::HandleKalimdorPriceCommand(char* args)
 {
-    uint32 itemId;
-    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemId))
-        return false;
-
     uint32 kalimdorprice;
     if (!ExtractOptUInt32(&args, kalimdorprice, 0))
+        return false;
+
+    uint32 itemId;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemId))
         return false;
 
     WorldDatabase.PExecute("UPDATE npc_vendor SET kalimdorcoins = %u WHERE item = %u",kalimdorprice,itemId);
