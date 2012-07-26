@@ -4174,7 +4174,7 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
             unitTarget->UpdateAllowedPositionZ(fx, fy, fz);
         }
 
-        unitTarget->NearTeleportTo(fx, fy, fz+2, unitTarget->GetOrientation(), unitTarget == m_caster);
+        unitTarget->NearTeleportTo(fx, fy, fz+0.5f, unitTarget->GetOrientation(), unitTarget == m_caster);
     }
 }
 
