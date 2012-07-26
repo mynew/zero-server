@@ -7828,7 +7828,7 @@ void ObjectMgr::AddVendorItem( uint32 entry,uint32 item, uint32 maxcount, uint32
     VendorItemData& vList = m_mCacheVendorItemMap[entry];
     vList.AddItem(item,maxcount,incrtime,kalimdorcoins);
 
-    WorldDatabase.PExecuteLog("INSERT INTO npc_vendor (entry,item,maxcount,incrtime) VALUES('%u','%u','%u','%u','%u')",entry, item, maxcount,incrtime,kalimdorcoins);
+    WorldDatabase.PExecuteLog("INSERT INTO npc_vendor (entry,item,maxcount,incrtime,kalimdorcoins) VALUES('%u','%u','%u','%u','%u')",entry, item, maxcount,incrtime,kalimdorcoins);
 }
 
 bool ObjectMgr::RemoveVendorItem( uint32 entry,uint32 item )
