@@ -16917,7 +16917,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
 
     if (KalimdorCoins < crItem->kalimdorcoins)
     {
-        ChatHandler(this).PSendSysMessage("You do not have enough KalimdorCoins to buy this item.");
+        ChatHandler(this).PSendSysMessage("You do not have enough KalimdorCoins to buy this item. You have %g and it costs %u",KalimdorCoins,crItem->kalimdorcoins);
         return false;
     }
 
