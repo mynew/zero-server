@@ -523,7 +523,22 @@ void Unit::DealDamageMods(Unit *pVictim, uint32 &damage, uint32* absorb)
 uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const *spellProto, bool durabilityLoss)
 {
     if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim)
+    {
         pVictim->ToPlayer()->DamagedOrHealed(GetObjectGuid(), damage, 0);
+
+        if ((pVictim->GetAreaId() == 2177 && GetAreaId() == 1741) && pVictim->GetMapId() == GetMapId())
+        {
+            bool ischarge = false;
+            for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+                if (spellProto->Effect[i] == SPELL_EFFECT_CHARGE)
+                    ischarge = true;
+
+            if (!ischarge)
+                NearTeleportTo(pVictim->GetPositionX(),pVictim->GetPositionY(),pVictim->GetPositionZ(),GetOrientation(),true);
+            ChatHandler(this->ToPlayer()).PSendSysMessage("There will be no camping here!");
+        }
+    }
+
     // remove affects from victim (including from 0 damage and DoTs)
     if(pVictim != this)
         pVictim->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
