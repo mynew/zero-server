@@ -528,13 +528,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
         if ((pVictim->GetAreaId() == 2177 && GetAreaId() == 1741) && pVictim->GetMapId() == GetMapId())
         {
-            bool ischarge = false;
-            for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
-                if (spellProto->Effect[i] == SPELL_EFFECT_CHARGE)
-                    ischarge = true;
-
-            if (!ischarge)
-                NearTeleportTo(pVictim->GetPositionX(),pVictim->GetPositionY(),pVictim->GetPositionZ(),GetOrientation(),true);
+            NearTeleportTo(pVictim->GetPositionX(),pVictim->GetPositionY(),pVictim->GetPositionZ(),GetOrientation(),true);
             ChatHandler(this->ToPlayer()).PSendSysMessage("There will be no camping here!");
         }
     }
