@@ -778,7 +778,10 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
                     data << uint32(crItem->kalimdorcoins);
                 data << uint32(price);
                 data << uint32(pProto->MaxDurability);
-                data << uint32(pProto->BuyCount);
+                if (pProto->BuyCount <= 1)
+                    data << uint32(pProto->RequiredHonorRank);
+                else
+                    data << uint32(pProto->BuyCount);
             }
         }
     }

@@ -4954,3 +4954,18 @@ bool ChatHandler::HandleKalimdorPriceCommand(char* args)
     PSendSysMessage("Updated kalimdor price to %u on item with id %u",kalimdorprice,itemId);
     return true;
 }
+
+bool ChatHandler::HandleRankReqCommand(char* args)
+{
+    uint32 rankrequirement;
+    if (!ExtractOptUInt32(&args, rankrequirement, 0))
+        return false;
+
+    uint32 itemId;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemId))
+        return false;
+
+    WorldDatabase.PExecute("UPDATE item_template SET requiredhonorrank = %u WHERE entry = %u",rankrequirement,itemId);
+    PSendSysMessage("Updated rank requirement to %u on item with id %u",rankrequirement,itemId);
+    return true;
+}
