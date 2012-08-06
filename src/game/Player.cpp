@@ -3313,6 +3313,27 @@ void Player::RemoveSpellCategoryCooldown(uint32 cat, bool update /* = false */)
     }
 }
 
+void Player::Remove10MinSpellCooldown()
+{
+    // remove cooldowns on spells that has < 15 min CD
+    SpellCooldowns::iterator itr, next;
+    // iterate spell cooldowns
+    for(itr = m_spellCooldowns.begin();itr != m_spellCooldowns.end(); itr = next)
+    {
+        next = itr;
+        ++next;
+        SpellEntry const * entry = sSpellStore.LookupEntry(itr->first);
+        // check if spellentry is present and if the cooldown is less than 15 mins
+        if( entry &&
+            entry->RecoveryTime <= 10 * MINUTE * IN_MILLISECONDS &&
+            entry->CategoryRecoveryTime <= 10 * MINUTE * IN_MILLISECONDS )
+        {
+            // remove & notify
+            RemoveSpellCooldown(itr->first, true);
+        }
+    }
+}
+
 void Player::RemoveAllSpellCooldown()
 {
     if(!m_spellCooldowns.empty())

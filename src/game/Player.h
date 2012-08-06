@@ -1447,6 +1447,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         GlobalCooldownMgr& GetGlobalCooldownMgr() { return m_GlobalCooldownMgr; }
 
+        void Remove10MinSpellCooldown();
         void RemoveAllSpellCooldown();
         void _LoadSpellCooldowns(QueryResult *result);
         void _SaveSpellCooldowns();

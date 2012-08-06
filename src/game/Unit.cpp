@@ -764,7 +764,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             if(pPlayer)
             {
                 pPlayer->ResurrectPlayer(1);
-                pPlayer->RemoveAllSpellCooldown();
+                pPlayer->Remove10MinSpellCooldown();
                 pPlayer->AddAura(29921); // Invisibility
                 pPlayer->AddAura(13874); // Divine Shield
                 pPlayer->AddAura(30225); // Silence
