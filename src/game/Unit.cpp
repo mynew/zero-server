@@ -533,6 +533,12 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         }
     }
 
+    if (pVictim->HasAura(11958))
+        return 0;
+
+    if (spellProto->speed > 0 && pVictim->HasStealthAura())
+        return 0;
+
     // remove affects from victim (including from 0 damage and DoTs)
     if(pVictim != this)
         pVictim->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
