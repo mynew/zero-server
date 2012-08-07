@@ -6037,9 +6037,6 @@ bool Player::RewardHonor(Unit *uVictim,uint32 groupsize)
     {
         Player *pVictim = (Player *)uVictim;
 
-        if( GetTeam() == pVictim->GetTeam() )
-            return false;
-
         if( getLevel() < (pVictim->getLevel()+5) )
         {
             AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
