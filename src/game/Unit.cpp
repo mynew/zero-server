@@ -528,18 +528,19 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
     if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim)
     {
-        /*uint32 groupsize = 0;
-        if (isInGuru)
+        uint32 groupsize = 0;
+        Player* pPlayer = ToPlayer();
+        if (isInGuru && pPlayer->GetGroup())
         {
-            for(GroupReference *itr = ToPlayer()->GetGroup()->GetFirstMember(); itr != NULL; itr = itr->next())
+            for(GroupReference *itr = pPlayer->GetGroup()->GetFirstMember(); itr != NULL; itr = itr->next())
                 groupsize ++;
 
             if (groupsize > 3)
             {
-                ToPlayer()->GetGroup()->RemoveMember(ToPlayer()->GetObjectGuid(),0);
-                ChatHandler(ToPlayer()).PSendSysMessage("You was removed from the group, we do not allow groups bigger then 3 in Gurubashi Arena.");
+                pPlayer->GetGroup()->RemoveMember(pPlayer->GetObjectGuid(),1);
+                ChatHandler(pPlayer).PSendSysMessage("You was removed from the group, we do not allow groups bigger then 3 in Gurubashi Arena.");
             }
-        }*/
+        }
 
 
         pVictim->ToPlayer()->DamagedOrHealed(GetObjectGuid(), damage, 0);
@@ -5228,18 +5229,19 @@ int32 Unit::DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellPro
 
     if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim)
     {
-        /*uint32 groupsize = 0;
-        if (isInGuru)
+        Player* pPlayer = ToPlayer();
+        uint32 groupsize = 0;
+        if (isInGuru && pPlayer->GetGroup())
         {
-            for(GroupReference *itr = ToPlayer()->GetGroup()->GetFirstMember(); itr != NULL; itr = itr->next())
+            for(GroupReference *itr = pPlayer->GetGroup()->GetFirstMember(); itr != NULL; itr = itr->next())
                 groupsize ++;
 
             if (groupsize > 3)
             {
-                ToPlayer()->GetGroup()->RemoveMember(ToPlayer()->GetObjectGuid(),0);
-                ChatHandler(ToPlayer()).PSendSysMessage("You was removed from the group, we do not allow groups bigger then 3 in Gurubashi Arena.");
+                ToPlayer()->GetGroup()->RemoveMember(pPlayer->GetObjectGuid(),1);
+                ChatHandler(pPlayer).PSendSysMessage("You was removed from the group, we do not allow groups bigger then 3 in Gurubashi Arena.");
             }
-        }*/
+        }
     }
     int32 gain = pVictim->ModifyHealth(int32(addhealth));
 
