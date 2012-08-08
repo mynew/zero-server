@@ -737,7 +737,11 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             }
         }
 
-        if (!spiritOfRedemtionTalentReady)
+        bool isInGuru = false;
+        if (GetMapId() == 0 && GetZoneId() == 33 && (GetAreaId() == 1741 || GetAreaId() == 2177))
+            isInGuru = true;
+
+        if (!spiritOfRedemtionTalentReady && !isInGuru)
         {
             DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE,"SET JUST_DIED");
             pVictim->SetDeathState(JUST_DIED);
@@ -761,7 +765,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             // FORM_SPIRITOFREDEMPTION and related auras
             pVictim->CastSpell(pVictim,27827,true,NULL,spiritOfRedemtionTalentReady);
         }
-        else if (GetMapId() == 0 && GetZoneId() == 33 && (GetAreaId() == 1741 || GetAreaId() == 2177)) // Gurubashi Arena respawn
+        else if (isInGuru) // Gurubashi Arena respawn
         {
             Player *pPlayer = pVictim->ToPlayer();
             if(pPlayer)

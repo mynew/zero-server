@@ -14117,7 +14117,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder )
     if (c_result)
     {
         Field* c_fields = c_result->Fetch();
-        KalimdorCoins           = c_fields[0].GetFloat();
+        KalimdorCoins   = c_fields[0].GetFloat();
     }
 
     return true;
@@ -19263,6 +19263,8 @@ void Player::HandlePvPKill()
             {
                 uint32 attackerHealing = 0;
                 float damagePct = float(itr->second->damage) / float(victimHealth);
+                if (damagePct > 1)
+                    damagePct = 1.0f;
                 float attackerReward = (rewardcoins * damagePct)*killstreakMod;
 
                 pAttacker->KalimdorCoins += attackerReward;
@@ -19290,6 +19292,8 @@ void Player::HandlePvPKill()
                         float maxhealingPct = (float(itr->second->healing)/float(pAttacker->GetMaxHealth()));
                         if (maxhealingPct > 1)
                             maxhealingPct = 1.0f;
+                        if (healingPct > 1)
+                            healingPct = 1.0f;
                         float healerReward = ((attackerReward * healingPct)*maxhealingPct)*killstreakMod;
 
                         pHealer->KalimdorCoins += healerReward;
