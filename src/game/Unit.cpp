@@ -526,7 +526,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
     {
         pVictim->ToPlayer()->DamagedOrHealed(GetObjectGuid(), damage, 0);
 
-        if ((pVictim->GetAreaId() == 2177 && GetAreaId() == 1741) && pVictim->GetMapId() == GetMapId())
+        if ((pVictim->GetAreaId() == 2177 && GetAreaId() == 1741) && pVictim->GetMapId() == GetMapId() && !HasAura(13874))
         {
             NearTeleportTo(pVictim->GetPositionX(),pVictim->GetPositionY(),pVictim->GetPositionZ(),GetOrientation(),true);
             ChatHandler(this->ToPlayer()).PSendSysMessage("There will be no camping here!");
@@ -772,10 +772,9 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             {
                 pPlayer->ResurrectPlayer(1);
                 pPlayer->Remove10MinSpellCooldown();
-                pPlayer->AddAura(29921); // Invisibility
                 pPlayer->AddAura(13874); // Divine Shield
                 pPlayer->AddAura(30225); // Silence
-                pPlayer->AddAura(30013); // Disarm
+                pPlayer->AddAura(22691); // Disarm
 
                 uint32 rand = urand(1,6);
                 if (pPlayer->isGameMaster())
