@@ -531,7 +531,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         uint32 groupsize = 0;
         if (isInGuru)
         {
-            for(GroupReference *itr = ToPlayer->GetGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+            for(GroupReference *itr = ToPlayer()->GetGroup()->GetFirstMember(); itr != NULL; itr = itr->next())
                 groupsize ++;
 
             if (groupsize > 3)
@@ -5231,7 +5231,7 @@ int32 Unit::DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellPro
         uint32 groupsize = 0;
         if (isInGuru)
         {
-            for(GroupReference *itr = ToPlayer->GetGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+            for(GroupReference *itr = ToPlayer()->GetGroup()->GetFirstMember(); itr != NULL; itr = itr->next())
                 groupsize ++;
 
             if (groupsize > 3)
