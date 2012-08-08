@@ -69,7 +69,7 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, float dest_x,
     i_destSet = true;
     i_destX = dest_x;
     i_destY = dest_y;
-    i_destZ = dest_z+0.5f;
+    i_destZ = dest_z+1.0f;
 
     return StartTravel(traveller, sendMove);
 }
