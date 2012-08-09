@@ -857,19 +857,6 @@ class ObjectMgr
         static PetNameInvalidReason CheckPetName( const std::string& name );
         static bool IsValidCharterName( const std::string& name );
 
-        void LoadSpellDisabledEntrys();
-        uint8 IsSpellDisabled(uint32 spellid)
-        {
-            uint8 result=0;
-            SpellDisabledMap::const_iterator itr = m_spell_disabled.find(spellid);
-            if(itr != m_spell_disabled.end())
-            {
-                result=1;
-                if(itr->second != 0)
-                    result=2;
-            }
-            return result;
-        }
         int GetIndexForLocale(LocaleConstant loc);
         LocaleConstant GetLocaleForIndex(int i);
 
@@ -1042,9 +1029,6 @@ class ObjectMgr
         //character reserved names
         typedef std::set<std::wstring> ReservedNamesMap;
         ReservedNamesMap    m_ReservedNames;
-
-        typedef UNORDERED_MAP<uint32, uint32> SpellDisabledMap;
-        SpellDisabledMap  m_spell_disabled;
 
         GraveYardMap        mGraveYardMap;
 

@@ -47,7 +47,6 @@
 #include "Mail.h"
 #include "Formulas.h"
 #include "InstanceData.h"
-#include "ProgressBar.h"
 
 #include <limits>
 
@@ -6570,46 +6569,6 @@ const char *ObjectMgr::GetMangosString(int32 entry, int locale_idx) const
     else
         sLog.outErrorDb("Mangos string entry %i not found in DB.",entry);
     return "<error>";
-}
-
-void ObjectMgr::LoadSpellDisabledEntrys()
-{
-    m_spell_disabled.clear();                                // need for reload case
-    QueryResult *result = WorldDatabase.Query("SELECT entry, ischeat_spell FROM spell_disabled where active=1");
-
-    uint32 total_count = 0;
-    uint32 cheat_spell_count=0;
-
-    if( !result )
-    {
-        BarGoLink bar( 1 );
-        bar.step();
-
-        sLog.outString();
-        sLog.outString( ">> Loaded %u disabled spells", total_count );
-        return;
-    }
-
-    BarGoLink bar( result->GetRowCount() );
-
-    Field* fields;
-    do
-    {
-        bar.step();
-        fields = result->Fetch();
-        uint32 spellid = fields[0].GetUInt32();
-        bool ischeater = fields[1].GetBool();
-        m_spell_disabled[spellid] = ischeater;
-        ++total_count;
-        if(ischeater)
-        ++cheat_spell_count;
-
-   } while ( result->NextRow() );
-
-    delete result;
-
-    sLog.outString();
-    sLog.outString( ">> Loaded %u disabled spells ( %u - is cheaters spells)", total_count, cheat_spell_count);
 }
 
 void ObjectMgr::LoadFishingBaseSkillLevel()
