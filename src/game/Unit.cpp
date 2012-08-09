@@ -789,7 +789,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                 pPlayer->Remove10MinSpellCooldown();
                 pPlayer->AddAura(13874); // Divine Shield
                 pPlayer->AddAura(30225); // Silence
-                pPlayer->AddAura(27581); // Disarm
+                pPlayer->AddAura(22691); // Disarm
 
                 uint32 rand = urand(1,6);
                 if (pPlayer->isGameMaster())
