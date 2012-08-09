@@ -713,6 +713,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "kalimdorprice",  SEC_GAMEMASTER,     false, &ChatHandler::HandleKalimdorPriceCommand,       "", NULL },
         { "rankrequirement",SEC_GAMEMASTER,     false, &ChatHandler::HandleRankReqCommand,             "", NULL },
         { "coins",          SEC_PLAYER,         true,  &ChatHandler::HandleCoinsCommand,               "", NULL },
+        { "getrank",        SEC_PLAYER,         true,  &ChatHandler::HandleCoinsCommand,               "", NULL },
         { "togglebuy",      SEC_PLAYER,         true,  &ChatHandler::HandleToggleBuyCommand,           "", NULL },
         { "quit",           SEC_CONSOLE,        true,  &ChatHandler::HandleQuitCommand,                "", NULL },
 

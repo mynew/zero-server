@@ -365,6 +365,8 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
     KillBounty        = 0;
     /* PvP System End */
     KalimdorCoins     = 0.0f;
+    KalimdorRank      = 0;
+    TenSTimer         = 0;
     BuyEnabled        = false;
 
     m_transport = 0;
@@ -1090,6 +1092,39 @@ void Player::Update( uint32 update_diff, uint32 p_time )
 {
     if(!IsInWorld())
         return;
+
+    TenSTimer += update_diff;
+    if (TenSTimer > 10000)
+    {
+        uint32 HonorableKills = GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
+        if (HonorableKills >= 100 && HonorableKills < 250)
+            KalimdorRank = 1;
+        else if (HonorableKills >= 250 && HonorableKills < 500)
+            KalimdorRank = 2;
+        else if (HonorableKills >= 500 && HonorableKills < 750)
+            KalimdorRank = 3;
+        else if (HonorableKills >= 750 && HonorableKills < 800)
+            KalimdorRank = 4;
+        else if (HonorableKills >= 800 && HonorableKills < 1000)
+            KalimdorRank = 6;
+        else if (HonorableKills >= 1000 && HonorableKills < 1500)
+            KalimdorRank = 7;
+        else if (HonorableKills >= 1500 && HonorableKills < 2000)
+            KalimdorRank = 8;
+        else if (HonorableKills >= 2000 && HonorableKills < 3000)
+            KalimdorRank = 9;
+        else if (HonorableKills >= 3000 && HonorableKills < 4000)
+            KalimdorRank = 10;
+        else if (HonorableKills >= 5000 && HonorableKills < 6000)
+            KalimdorRank = 11;
+        else if (HonorableKills >= 6000 && HonorableKills < 7000)
+            KalimdorRank = 12;
+        else if (HonorableKills >= 7000 && HonorableKills < 8000)
+            KalimdorRank = 13;
+        else if (HonorableKills >= 8000)
+            KalimdorRank = 14;
+        TenSTimer = 0;
+    }
 
     if (GetZoneId() == 440 && GetAreaId() == 2317)
     {
@@ -9681,7 +9716,7 @@ InventoryResult Player::CanUseItem( ItemPrototype const *pProto, bool not_loadin
         if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
             return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
 
-        if (not_loading && GetHonorHighestRankInfo().rank < (uint8)pProto->RequiredHonorRank)
+        if (not_loading && KalimdorRank < (uint8)pProto->RequiredHonorRank)
             return EQUIP_ERR_CANT_EQUIP_RANK;
 
         if( getLevel() < pProto->RequiredLevel )
@@ -16914,9 +16949,10 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     }
 
     // not check level requiremnt for normal items (PvP related bonus items is another case)
-    if(pProto->RequiredHonorRank && (GetHonorHighestRankInfo().rank < (uint8)pProto->RequiredHonorRank || getLevel() < pProto->RequiredLevel) )
+    if(pProto->RequiredHonorRank && (KalimdorRank < (uint8)pProto->RequiredHonorRank || getLevel() < pProto->RequiredLevel) )
     {
-        ChatHandler(this).PSendSysMessage("You need rank %u to buy this item.",pProto->RequiredHonorRank);
+        ChatHandler(this).PSendSysMessage("You need KalimdorRank %u to buy this item.",pProto->RequiredHonorRank);
+        ChatHandler(this).PSendSysMessage("You have rank %u and can check it with .getrank",KalimdorRank);
         SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
         return false;
     }
