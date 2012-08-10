@@ -523,7 +523,7 @@ void Unit::DealDamageMods(Unit *pVictim, uint32 &damage, uint32* absorb)
 uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const *spellProto, bool durabilityLoss)
 {
     bool isInGuru = false;
-    if (GetMapId() == 0 && GetZoneId() == 33 && (GetAreaId() == 1741 || GetAreaId() == 2177))
+    if (GetMapId() == 0 && GetZoneId() == 33 && (GetAreaId() == 1741 || GetAreaId() == 2177) && pVictim->GetTypeId() == TYPEID_PLAYER)
         isInGuru = true;
 
     if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim)
