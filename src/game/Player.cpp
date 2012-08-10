@@ -366,6 +366,7 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
     /* PvP System End */
     KalimdorCoins     = 0.0f;
     KalimdorRank      = 4;
+    KalimdorRankName  = "";
     TenSTimer         = 0;
     BuyEnabled        = false;
     AutoQueue         = true;
@@ -1109,14 +1110,16 @@ void Player::Update( uint32 update_diff, uint32 p_time )
         else if (HonorableKills >= 750 && HonorableKills < 800)
             newrank = 4;
         else if (HonorableKills >= 800 && HonorableKills < 1000)
-            newrank = 6;
+            newrank = 5;
         else if (HonorableKills >= 1000 && HonorableKills < 1500)
-            newrank = 7;
+            newrank = 6;
         else if (HonorableKills >= 1500 && HonorableKills < 2000)
-            newrank = 8;
+            newrank = 7;
         else if (HonorableKills >= 2000 && HonorableKills < 3000)
-            newrank = 9;
+            newrank = 8;
         else if (HonorableKills >= 3000 && HonorableKills < 4000)
+            newrank = 9;
+        else if (HonorableKills >= 4000 && HonorableKills < 5000)
             newrank = 10;
         else if (HonorableKills >= 5000 && HonorableKills < 6000)
             newrank = 11;
@@ -1127,11 +1130,102 @@ void Player::Update( uint32 update_diff, uint32 p_time )
         else if (HonorableKills >= 8000)
             newrank = 14;
 
+        switch(newrank)
+        {
+        case 0:
+            KalimdorRankName = "Newbie";
+            break;
+        case 1:
+            if (GetTeam() == ALLIANCE)
+                KalimdorRankName = "Private";
+            else
+                KalimdorRankName = "Scout";
+            break;
+        case 2:
+            if (GetTeam() == ALLIANCE)
+                KalimdorRankName = "Corporal";
+            else
+                KalimdorRankName = "Grunt";
+            break;
+        case 3:
+            if (GetTeam() == ALLIANCE)
+                KalimdorRankName = "Sergeant";
+            else
+                KalimdorRankName = "Sergeant";
+            break;
+        case 4:
+            if (GetTeam() == ALLIANCE)
+                KalimdorRankName = "Master Sergeant";
+            else
+                KalimdorRankName = "Senior Sergeant";
+            break;
+        case 5:
+            if (GetTeam() == ALLIANCE)
+                KalimdorRankName = "Sergeant Major";
+            else
+                KalimdorRankName = "First Sergeant";
+            break;
+        case 6:
+            if (GetTeam() == ALLIANCE)
+                KalimdorRankName = "Knight";
+            else
+                KalimdorRankName = "Stone Guard";
+            break;
+        case 7:
+            if (GetTeam() == ALLIANCE)
+                KalimdorRankName = "Knight-Lieutenant";
+            else
+                KalimdorRankName = "Blood Guard";
+            break;
+        case 8:
+            if (GetTeam() == ALLIANCE)
+                KalimdorRankName = "Knight-Captain";
+            else
+                KalimdorRankName = "Legionnaire";
+            break;
+        case 9:
+            if (GetTeam() == ALLIANCE)
+                KalimdorRankName = "Knight-Champion";
+            else
+                KalimdorRankName = "Centurion";
+            break;
+        case 10:
+            if (GetTeam() == ALLIANCE)
+                KalimdorRankName = "Lieutenant Commander";
+            else
+                KalimdorRankName = "Champion";
+            break;
+        case 11:
+            if (GetTeam() == ALLIANCE)
+                KalimdorRankName = "Commander";
+            else
+                KalimdorRankName = "Lieutenant General";
+            break;
+        case 12:
+            if (GetTeam() == ALLIANCE)
+                KalimdorRankName = "Marshal";
+            else
+                KalimdorRankName = "General";
+            break;
+        case 13:
+            if (GetTeam() == ALLIANCE)
+                KalimdorRankName = "Field Marshal";
+            else
+                KalimdorRankName = "Warlord";
+            break;
+        case 14:
+            if (GetTeam() == ALLIANCE)
+                KalimdorRankName = "Grand Marshal";
+            else
+                KalimdorRankName = "High Warlord";
+            break;
+        }
+
         newrank += 4;
 
         if (newrank != KalimdorRank)
         {
-            ChatHandler(this).PSendSysMessage("You are kalimdorrank %u!",newrank-4);
+            ChatHandler(this).PSendSysMessage("You are kalimdorrank %u - %s!",newrank-4, KalimdorRankName.c_str());
         }
         KalimdorRank = newrank;
         TenSTimer = 0;
