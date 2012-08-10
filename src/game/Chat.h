@@ -568,6 +568,8 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleGoldPriceCommand(char* args);
         bool HandleKalimdorPriceCommand(char* args);
         bool HandleRankReqCommand(char* args);
+        bool HandleAutoQueueToggleCommand(char* args);
+        bool HandleAutoQueueMapCommand(char* args);
         bool HandleQuitCommand(char* args);
 
         //! Development Commands

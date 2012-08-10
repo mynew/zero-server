@@ -4967,9 +4967,55 @@ bool ChatHandler::HandleRankReqCommand(char* args)
         return false;
 
     if (rankrequirement > 0)
-        rankrequirement+4;
+        rankrequirement+=4;
 
     WorldDatabase.PExecute("UPDATE item_template SET requiredhonorrank = %u WHERE entry = %u",rankrequirement,itemId);
     PSendSysMessage("Updated rank requirement to %u on item with id %u",rankrequirement,itemId);
+    return true;
+}
+
+bool ChatHandler::HandleAutoQueueToggleCommand(char* /*args*/)
+{
+    Player* pPlayer = m_session->GetPlayer();
+    if (pPlayer)
+    {
+        if (pPlayer->AutoQueue)
+        {
+            pPlayer->AutoQueue = false;
+            ChatHandler(pPlayer).PSendSysMessage("You are no longer autoqueueing");
+        }
+        else
+        {
+            pPlayer->AutoQueue = true;
+            ChatHandler(pPlayer).PSendSysMessage("You are in autoqueue");
+        }
+    }
+    return true;
+}
+
+bool ChatHandler::HandleAutoQueueMapCommand(char* args)
+{
+    uint32 bg;
+    if (!ExtractOptUInt32(&args, bg, 0))
+    {
+        PSendSysMessage("You must choose 1-3 (1 = WSG 2 = AB 3 = AV)");
+        return false;
+    }
+    if (bg > 3 || bg < 1)
+    {
+        PSendSysMessage("You must choose 1-3 (1 = WSG 2 = AB 3 = AV)");
+        return false;
+    }
+    Player* pPlayer = m_session->GetPlayer();
+    if (pPlayer)
+    {
+        pPlayer->QueueMapID = bg;
+        if (bg == 1)
+            PSendSysMessage("You are now autoqueueing for WSG");
+        else if (bg == 2)
+            PSendSysMessage("You are now autoqueueing for AB");
+        else if (bg == 3)
+            PSendSysMessage("You are now autoqueueing for AV");
+    }
     return true;
 }

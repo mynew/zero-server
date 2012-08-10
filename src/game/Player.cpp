@@ -368,6 +368,8 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
     KalimdorRank      = 0;
     TenSTimer         = 0;
     BuyEnabled        = false;
+    AutoQueue         = true;
+    QueueMapID        = 1;
 
     m_transport = 0;
 
@@ -1133,6 +1135,9 @@ void Player::Update( uint32 update_diff, uint32 p_time )
         }
         KalimdorRank = newrank;
         TenSTimer = 0;
+
+        if (AutoQueue)
+            HandleBGQueue(GetObjectGuid(),QueueMapID);
     }
 
     if (GetZoneId() == 440 && GetAreaId() == 2317)
@@ -19465,4 +19470,82 @@ void Player::DamagedOrHealed(uint64 guid, uint32 damage, uint32 heal)
     }
     data->damage += damage;
     data->healing += heal;
+}
+
+
+void Player::HandleBGQueue(ObjectGuid guid, uint32 mapId)
+{
+    if (mapId == 1)
+        mapId = 489;
+    else if (mapId == 2)
+        mapId = 529;
+    else if (mapId == 3)
+        mapId = 30;
+
+    if (mapId <= 3) // Check if mapid was found
+        return; // Wasnt found
+
+    if (isAFK())
+        return;
+    
+    BattleGroundTypeId bgTypeId = GetBattleGroundTypeIdByMapId(mapId);
+
+    if(bgTypeId == BATTLEGROUND_TYPE_NONE)
+    {
+        sLog.outError("Battleground: invalid bgtype (%u) received. possible cheater? player guid %u",bgTypeId,GetGUIDLow());
+        return;
+    }
+
+    DEBUG_LOG( "WORLD: Recvd CMSG_BATTLEMASTER_JOIN Message from %s", guid.GetString().c_str());
+
+    // can do this, since it's battleground, not arena
+    BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(bgTypeId);
+
+    // ignore if player is already in BG
+    if (InBattleGround())
+        return;
+
+    // get bg instance or bg template if instance not found
+    BattleGround *bg = NULL;
+
+    if (!bg && !(bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId)))
+    {
+        sLog.outError("Battleground: no available bg / template found");
+        return;
+    }
+
+    BattleGroundBracketId bgBracketId = GetBattleGroundBracketIdFromLevel(bgTypeId);
+
+    // check Deserter debuff
+    if (!CanJoinToBattleground())
+    {
+        WorldPacket data(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
+        data << uint32(0xFFFFFFFE);
+        GetSession()->SendPacket(&data);
+        return;
+    }
+    // check if already in queue
+    if (GetBattleGroundQueueIndex(bgQueueTypeId) < PLAYER_MAX_BATTLEGROUND_QUEUES)
+        return; //player is already in this queue
+
+    // check if has free queue slots
+    if (!HasFreeBattleGroundQueueId())
+        return;
+
+    BattleGroundQueue& bgQueue = sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId];
+
+    GroupQueueInfo * ginfo = bgQueue.AddGroup(this, NULL, bgTypeId, bgBracketId, false);
+    uint32 avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, GetBattleGroundBracketIdFromLevel(bgTypeId));
+    // already checked if queueSlot is valid, now just get it
+    uint32 queueSlot = AddBattleGroundQueueId(bgQueueTypeId);
+    // store entry point coords
+    SetBattleGroundEntryPoint();
+
+    WorldPacket data;
+    // send status packet (in queue)
+    sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, queueSlot, STATUS_WAIT_QUEUE, avgTime, 0);
+    GetSession()->SendPacket(&data);
+    DEBUG_LOG("Battleground: player joined queue for bg queue type %u bg type %u: GUID %u, NAME %s",bgQueueTypeId,bgTypeId,GetGUIDLow(), GetName());
+
+    sBattleGroundMgr.ScheduleQueueUpdate(bgQueueTypeId, bgTypeId, GetBattleGroundBracketIdFromLevel(bgTypeId));
 }

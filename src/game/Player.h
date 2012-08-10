@@ -867,11 +867,14 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 KalimdorRank;
         uint32 TenSTimer;
         bool BuyEnabled;
+        bool AutoQueue;
+        uint32 QueueMapID;
 
         void HandlePvPKill();
         bool HandlePvPAntifarm(Player* victim);
         std::map<uint64, DamageHealData*> m_DamagersAndHealers;
         void DamagedOrHealed(uint64 guid, uint32 damage, uint32 heal);
+        void HandleBGQueue(ObjectGuid guid, uint32 mapId);
 
         bool AddAura(uint32 spellID);
 
