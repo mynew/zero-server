@@ -1124,12 +1124,13 @@ void Player::Update( uint32 update_diff, uint32 p_time )
             newrank = 13;
         else if (HonorableKills >= 8000)
             newrank = 14;
+        newrank+4;
 
         if (newrank != KalimdorRank)
         {
             ChatHandler(this).PSendSysMessage("You are kalimdorrank %u!",newrank);
         }
-        KalimdorRank = newrank+4;
+        KalimdorRank = newrank;
         TenSTimer = 0;
     }
 
