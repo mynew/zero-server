@@ -365,7 +365,7 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
     KillBounty        = 0;
     /* PvP System End */
     KalimdorCoins     = 0.0f;
-    KalimdorRank      = 0;
+    KalimdorRank      = 4;
     TenSTimer         = 0;
     BuyEnabled        = false;
     AutoQueue         = true;
