@@ -1129,7 +1129,7 @@ void Player::Update( uint32 update_diff, uint32 p_time )
 
         if (newrank != KalimdorRank)
         {
-            ChatHandler(this).PSendSysMessage("You are kalimdorrank %u!",newrank);
+            ChatHandler(this).PSendSysMessage("You are kalimdorrank %u!",newrank-4);
         }
         KalimdorRank = newrank;
         TenSTimer = 0;
