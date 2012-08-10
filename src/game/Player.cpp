@@ -1132,6 +1132,12 @@ void Player::Update( uint32 update_diff, uint32 p_time )
         if (isDead())
             ResurrectPlayer(1.0f,false);
     }
+    else if (GetZoneId() == 1519 && GetAreaId() == 1519)
+    {
+        SetPvP(false);
+        if (isDead())
+            ResurrectPlayer(1.0f,false);
+    }
     else if (GetAreaId() == 2177 && GetPositionZ() < 21)
         NearTeleportTo(GetPositionX(),GetPositionY(),33.5f,GetOrientation(),true);
 
