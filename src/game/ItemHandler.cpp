@@ -779,7 +779,7 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
                 data << uint32(price);
                 data << uint32(pProto->MaxDurability);
                 if (pProto->BuyCount <= 1)
-                    data << uint32(pProto->RequiredHonorRank);
+                    data << uint32(pProto->RequiredHonorRank-4);
                 else
                     data << uint32(pProto->BuyCount);
             }
