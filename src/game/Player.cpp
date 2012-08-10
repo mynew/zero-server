@@ -16971,7 +16971,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     // not check level requiremnt for normal items (PvP related bonus items is another case)
     if(pProto->RequiredHonorRank && (KalimdorRank < (uint8)pProto->RequiredHonorRank || getLevel() < pProto->RequiredLevel) )
     {
-        ChatHandler(this).PSendSysMessage("You need KalimdorRank %u to buy this item.",pProto->RequiredHonorRank);
+        ChatHandler(this).PSendSysMessage("You need KalimdorRank %u to buy this item.",pProto->RequiredHonorRank-4);
         ChatHandler(this).PSendSysMessage("You have rank %u and can check it with .getrank",KalimdorRank-4);
         SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
         return false;
