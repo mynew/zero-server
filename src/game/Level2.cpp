@@ -4966,7 +4966,10 @@ bool ChatHandler::HandleRankReqCommand(char* args)
     if (!ExtractUint32KeyFromLink(&args, "Hitem", itemId))
         return false;
 
-    WorldDatabase.PExecute("UPDATE item_template SET requiredhonorrank = %u WHERE entry = %u",rankrequirement+4,itemId);
+    if (rankrequirement > 0)
+        rankrequirement+4;
+
+    WorldDatabase.PExecute("UPDATE item_template SET requiredhonorrank = %u WHERE entry = %u",rankrequirement,itemId);
     PSendSysMessage("Updated rank requirement to %u on item with id %u",rankrequirement,itemId);
     return true;
 }
