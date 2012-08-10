@@ -328,7 +328,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->RequiredSkill;
         data << pProto->RequiredSkillRank;
         data << pProto->RequiredSpell;
-        data << pProto->RequiredHonorRank;
+        data << pProto->RequiredHonorRank+4;
         data << pProto->RequiredCityRank;
         data << pProto->RequiredReputationFaction;
         data << (pProto->RequiredReputationFaction > 0  ? pProto->RequiredReputationRank : 0 );  // send value only if reputation faction id setted ( needed for some items)
@@ -779,7 +779,7 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
                 data << uint32(price);
                 data << uint32(pProto->MaxDurability);
                 if (pProto->BuyCount <= 1)
-                    data << uint32(pProto->RequiredHonorRank);
+                    data << uint32(pProto->RequiredHonorRank+4);
                 else
                     data << uint32(pProto->BuyCount);
             }

@@ -1097,32 +1097,39 @@ void Player::Update( uint32 update_diff, uint32 p_time )
     if (TenSTimer > 10000)
     {
         uint32 HonorableKills = GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
+        uint32 newrank = 0;
         if (HonorableKills >= 100 && HonorableKills < 250)
-            KalimdorRank = 1;
+            newrank = 1;
         else if (HonorableKills >= 250 && HonorableKills < 500)
-            KalimdorRank = 2;
+            newrank = 2;
         else if (HonorableKills >= 500 && HonorableKills < 750)
-            KalimdorRank = 3;
+            newrank = 3;
         else if (HonorableKills >= 750 && HonorableKills < 800)
-            KalimdorRank = 4;
+            newrank = 4;
         else if (HonorableKills >= 800 && HonorableKills < 1000)
-            KalimdorRank = 6;
+            newrank = 6;
         else if (HonorableKills >= 1000 && HonorableKills < 1500)
-            KalimdorRank = 7;
+            newrank = 7;
         else if (HonorableKills >= 1500 && HonorableKills < 2000)
-            KalimdorRank = 8;
+            newrank = 8;
         else if (HonorableKills >= 2000 && HonorableKills < 3000)
-            KalimdorRank = 9;
+            newrank = 9;
         else if (HonorableKills >= 3000 && HonorableKills < 4000)
-            KalimdorRank = 10;
+            newrank = 10;
         else if (HonorableKills >= 5000 && HonorableKills < 6000)
-            KalimdorRank = 11;
+            newrank = 11;
         else if (HonorableKills >= 6000 && HonorableKills < 7000)
-            KalimdorRank = 12;
+            newrank = 12;
         else if (HonorableKills >= 7000 && HonorableKills < 8000)
-            KalimdorRank = 13;
+            newrank = 13;
         else if (HonorableKills >= 8000)
-            KalimdorRank = 14;
+            newrank = 14;
+
+        if (newrank != KalimdorRank)
+        {
+            ChatHandler(this).PSendSysMessage("You are kalimdorrank %u!",newrank);
+        }
+        KalimdorRank = newrank;
         TenSTimer = 0;
     }
 
