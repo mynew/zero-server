@@ -19642,4 +19642,5 @@ void Player::HandleBGQueue(ObjectGuid guid, uint32 mapId)
     DEBUG_LOG("Battleground: player joined queue for bg queue type %u bg type %u: GUID %u, NAME %s",bgQueueTypeId,bgTypeId,GetGUIDLow(), GetName());
 
     sBattleGroundMgr.ScheduleQueueUpdate(bgQueueTypeId, bgTypeId, GetBattleGroundBracketIdFromLevel(bgTypeId));
+    ChatHandler(this).PSendSysMessage("You was autoadded to bg queue, disable autoqueueing with command .queue");
 }
