@@ -494,6 +494,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "spell_scripts",               SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSpellScriptsCommand,            "", NULL },
         { "spell_target_position",       SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSpellTargetPositionCommand,     "", NULL },
         { "spell_threats",               SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSpellThreatsCommand,            "", NULL },
+        { "spell_disabled",              SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSpellDisabledCommand,           "", NULL },
 
         { NULL,                          0,                 false, NULL,                                                     "", NULL }
     };
@@ -708,6 +709,14 @@ ChatCommand * ChatHandler::getCommandTable()
         { "repairitems",    SEC_GAMEMASTER,     true,  &ChatHandler::HandleRepairitemsCommand,         "", NULL },
         { "stable",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleStableCommand,              "", NULL },
         { "waterwalk",      SEC_GAMEMASTER,     false, &ChatHandler::HandleWaterwalkCommand,           "", NULL },
+        { "goldprice",      SEC_GAMEMASTER,     false, &ChatHandler::HandleGoldPriceCommand,           "", NULL },
+        { "kalimdorprice",  SEC_GAMEMASTER,     false, &ChatHandler::HandleKalimdorPriceCommand,       "", NULL },
+        { "rankrequirement",SEC_GAMEMASTER,     false, &ChatHandler::HandleRankReqCommand,             "", NULL },
+        { "coins",          SEC_PLAYER,         true,  &ChatHandler::HandleCoinsCommand,               "", NULL },
+        { "queue",          SEC_PLAYER,         true,  &ChatHandler::HandleAutoQueueToggleCommand,     "", NULL },
+        { "selectqueue",    SEC_PLAYER,         true,  &ChatHandler::HandleAutoQueueMapCommand,        "", NULL },
+        { "getrank",        SEC_PLAYER,         true,  &ChatHandler::HandleCoinsCommand,               "", NULL },
+        { "togglebuy",      SEC_PLAYER,         true,  &ChatHandler::HandleToggleBuyCommand,           "", NULL },
         { "quit",           SEC_CONSOLE,        true,  &ChatHandler::HandleQuitCommand,                "", NULL },
 
         { NULL,             0,                  false, NULL,                                           "", NULL }

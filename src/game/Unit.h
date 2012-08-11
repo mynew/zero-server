@@ -976,6 +976,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         virtual ~Unit ( );
 
+        Player* ToPlayer(){ if (GetTypeId() == TYPEID_PLAYER)  return reinterpret_cast<Player*>(this); else return NULL;  }
+        Creature* ToCreature(){ if (GetTypeId() == TYPEID_UNIT) return reinterpret_cast<Creature*>(this); else return NULL; }
+
         void AddToWorld();
         void RemoveFromWorld();
 

@@ -598,6 +598,9 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_UINT32_MAIL_DELIVERY_DELAY, "MailDeliveryDelay", HOUR);
 
+    setConfig(CONFIG_BOOL_EXTERNAL_MAIL, "ExternalMail",false);
+    setConfig(CONFIG_UINT32_EXTERNAL_MAIL_INTERVAL,"ExternalMail.Interval",1);
+
     setConfigMin(CONFIG_UINT32_MASS_MAILER_SEND_PER_TICK, "MassMailer.SendPerTick", 10, 1);
 
     setConfigPos(CONFIG_UINT32_UPTIME_UPDATE, "UpdateUptimeInterval", 10);
@@ -1044,6 +1047,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading spell pet auras..." );
     sSpellMgr.LoadSpellPetAuras();
 
+    sLog.outString( "Loading disabled spells..." );
+    sSpellMgr.LoadSpellDisabledEntrys();
+
     sLog.outString( "Loading Player Create Info & Level Stats..." );
     sLog.outString();
     sObjectMgr.LoadPlayerInfo();
@@ -1221,6 +1227,8 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_CORPSES].SetInterval(20*MINUTE*IN_MILLISECONDS);
     m_timers[WUPDATE_DELETECHARS].SetInterval(DAY*IN_MILLISECONDS); // check for chars to delete every day
 
+    extmail_timer.SetInterval(getConfig(CONFIG_UINT32_EXTERNAL_MAIL_INTERVAL) * MINUTE * IN_MILLISECONDS);
+
     //to set mailtimer to return mails every day between 4 and 5 am
     //mailtimer is increased when updating auctions
     //one second is 1000 -(tested on win system)
@@ -1330,6 +1338,17 @@ void World::Update(uint32 diff)
 
     ///-Update mass mailer tasks if any
     sMassMailMgr.Update();
+
+    /// Handle external mail
+    if (getConfig(CONFIG_BOOL_EXTERNAL_MAIL))
+    {
+        extmail_timer.Update(diff);
+        if (extmail_timer.Passed())
+        {
+            WorldSession::SendExternalMails();
+            extmail_timer.Reset();
+        }
+    }
 
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
@@ -2109,4 +2128,100 @@ bool World::configNoReload(bool reload, eConfigBoolValues index, char const* fie
         sLog.outError("%s option can't be changed at mangosd.conf reload, using current value (%s).", fieldname, getConfig(index) ? "'true'" : "'false'");
 
     return false;
+}
+
+std::string World::GetKalimdorRankName(uint32 rank, Team team)
+{
+    std::string KalimdorRankName = "";
+    switch(rank)
+    {
+    case 0:
+        KalimdorRankName = "Newbie";
+        break;
+    case 1:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Private";
+        else
+            KalimdorRankName = "Scout";
+        break;
+    case 2:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Corporal";
+        else
+            KalimdorRankName = "Grunt";
+        break;
+    case 3:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Sergeant";
+        else
+            KalimdorRankName = "Sergeant";
+        break;
+    case 4:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Master Sergeant";
+        else
+            KalimdorRankName = "Senior Sergeant";
+        break;
+    case 5:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Sergeant Major";
+        else
+            KalimdorRankName = "First Sergeant";
+        break;
+    case 6:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Knight";
+        else
+            KalimdorRankName = "Stone Guard";
+        break;
+    case 7:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Knight-Lieutenant";
+        else
+            KalimdorRankName = "Blood Guard";
+        break;
+    case 8:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Knight-Captain";
+        else
+            KalimdorRankName = "Legionnaire";
+        break;
+    case 9:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Knight-Champion";
+        else
+            KalimdorRankName = "Centurion";
+        break;
+    case 10:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Lieutenant Commander";
+        else
+            KalimdorRankName = "Champion";
+        break;
+    case 11:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Commander";
+        else
+            KalimdorRankName = "Lieutenant General";
+        break;
+    case 12:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Marshal";
+        else
+            KalimdorRankName = "General";
+        break;
+    case 13:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Field Marshal";
+        else
+            KalimdorRankName = "Warlord";
+        break;
+    case 14:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Grand Marshal";
+        else
+            KalimdorRankName = "High Warlord";
+        break;
+    }
+    return KalimdorRankName;
 }

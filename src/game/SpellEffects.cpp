@@ -4174,7 +4174,7 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
             unitTarget->UpdateAllowedPositionZ(fx, fy, fz);
         }
 
-        unitTarget->NearTeleportTo(fx, fy, fz, unitTarget->GetOrientation(), unitTarget == m_caster);
+        unitTarget->NearTeleportTo(fx, fy, fz+0.5f, unitTarget->GetOrientation(), unitTarget == m_caster);
     }
 }
 
@@ -4281,7 +4281,7 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
         ((Creature *)unitTarget)->StopMoving();
 
     // Only send MOVEMENTFLAG_WALK_MODE, client has strange issues with other move flags
-    m_caster->MonsterMove(x, y, z, 1);
+    m_caster->MonsterMove(x, y, z+1.0f, 1);
 
     // not all charge effects used in negative spells
     if (unitTarget != m_caster && !IsPositiveSpell(m_spellInfo->Id))
