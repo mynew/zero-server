@@ -19471,9 +19471,9 @@ void Player::HandlePvPKill()
     if (pMostDamager)
     {
         if (pMostDamager->GetGroup())
-            pMostDamager->GetGroup()->RewardGroupAtKill(this, pMostDamager);
+            pMostDamager->GetGroup()->RewardGroupAtKill(this->ToUnit(), pMostDamager);
         else
-            pMostDamager->RewardSinglePlayerAtKill(this);
+            pMostDamager->RewardSinglePlayerAtKill(this->ToUnit());
         ChatHandler(this).PSendSysMessage("%s[PvP System]%s Your main attacker was %s%s who did %u damage to you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE,maxdamagerDmg);
     }
 
