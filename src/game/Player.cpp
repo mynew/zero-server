@@ -19471,7 +19471,9 @@ void Player::HandlePvPKill()
     if (pMostDamager)
     {
         if (pMostDamager->GetGroup())
-            pMostDamager->GetGroup()->RewardGroupAtKill(this, pMostDamager);
+            for(GroupReference *itr = pMostDamager->GetGroup()->GetFirstMember(); itr != NULL; itr = itr->next())
+                if (itr->getSource() && itr->getSource()->GetDistance(pMostDamager->GetPositionX(),pMostDamager->GetPositionY(),pMostDamager->GetPositionZ()) < sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE))
+                    itr->getSource()->RewardSinglePlayerAtKill(this);
         else
             pMostDamager->RewardSinglePlayerAtKill(this);
         ChatHandler(this).PSendSysMessage("%s[PvP System]%s Your main attacker was %s%s who did %u damage to you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE,maxdamagerDmg);
