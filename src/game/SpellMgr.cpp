@@ -2166,6 +2166,59 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
     return true;
 }
 
+bool SpellMgr::IsSpellDisabled(uint32 spellid) const
+{
+    SpellDisabledMap::const_iterator itr = mSpellDisabled.find(spellid);
+
+    if(itr != mSpellDisabled.end())
+        return true;
+
+    return false;
+}
+
+void SpellMgr::LoadSpellDisabledEntrys()
+{
+    mSpellDisabled.clear();                                // for reload case
+    QueryResult *result = WorldDatabase.Query("SELECT entry FROM spell_disabled WHERE active_check = 1");
+
+    uint32 count = 0;
+
+    if(!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+
+        sLog.outString();
+        sLog.outString(">> Loaded %u disabled spells", count);
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    Field* fields;
+    do
+    {
+        bar.step();
+        fields = result->Fetch();
+        uint32 spellId = fields[0].GetUInt32();
+        
+        SpellEntry const* spellEntry = sSpellStore.LookupEntry(spellId);
+        if(!spellEntry)
+        {
+            sLog.outError("Spell %u not exist but should be disabled", spellId);
+            continue;
+        }
+
+        ++count;
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString(">> Loaded %u disabled spells", count);
+}
+
 bool SpellMgr::IsProfessionOrRidingSpell(uint32 spellId)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
