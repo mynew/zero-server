@@ -865,7 +865,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         /* PvP System End */
         float KalimdorCoins;
         uint32 KalimdorRank;
-        std::string KalimdorRankName;
         uint32 TenSTimer;
         bool BuyEnabled;
         bool AutoQueue;

@@ -366,7 +366,6 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
     /* PvP System End */
     KalimdorCoins     = 0.0f;
     KalimdorRank      = 4;
-    KalimdorRankName  = "";
     TenSTimer         = 0;
     BuyEnabled        = false;
     AutoQueue         = true;
@@ -1130,102 +1129,11 @@ void Player::Update( uint32 update_diff, uint32 p_time )
         else if (HonorableKills >= 8000)
             newrank = 14;
 
-        switch(newrank)
-        {
-        case 0:
-            KalimdorRankName = "Newbie";
-            break;
-        case 1:
-            if (GetTeam() == ALLIANCE)
-                KalimdorRankName = "Private";
-            else
-                KalimdorRankName = "Scout";
-            break;
-        case 2:
-            if (GetTeam() == ALLIANCE)
-                KalimdorRankName = "Corporal";
-            else
-                KalimdorRankName = "Grunt";
-            break;
-        case 3:
-            if (GetTeam() == ALLIANCE)
-                KalimdorRankName = "Sergeant";
-            else
-                KalimdorRankName = "Sergeant";
-            break;
-        case 4:
-            if (GetTeam() == ALLIANCE)
-                KalimdorRankName = "Master Sergeant";
-            else
-                KalimdorRankName = "Senior Sergeant";
-            break;
-        case 5:
-            if (GetTeam() == ALLIANCE)
-                KalimdorRankName = "Sergeant Major";
-            else
-                KalimdorRankName = "First Sergeant";
-            break;
-        case 6:
-            if (GetTeam() == ALLIANCE)
-                KalimdorRankName = "Knight";
-            else
-                KalimdorRankName = "Stone Guard";
-            break;
-        case 7:
-            if (GetTeam() == ALLIANCE)
-                KalimdorRankName = "Knight-Lieutenant";
-            else
-                KalimdorRankName = "Blood Guard";
-            break;
-        case 8:
-            if (GetTeam() == ALLIANCE)
-                KalimdorRankName = "Knight-Captain";
-            else
-                KalimdorRankName = "Legionnaire";
-            break;
-        case 9:
-            if (GetTeam() == ALLIANCE)
-                KalimdorRankName = "Knight-Champion";
-            else
-                KalimdorRankName = "Centurion";
-            break;
-        case 10:
-            if (GetTeam() == ALLIANCE)
-                KalimdorRankName = "Lieutenant Commander";
-            else
-                KalimdorRankName = "Champion";
-            break;
-        case 11:
-            if (GetTeam() == ALLIANCE)
-                KalimdorRankName = "Commander";
-            else
-                KalimdorRankName = "Lieutenant General";
-            break;
-        case 12:
-            if (GetTeam() == ALLIANCE)
-                KalimdorRankName = "Marshal";
-            else
-                KalimdorRankName = "General";
-            break;
-        case 13:
-            if (GetTeam() == ALLIANCE)
-                KalimdorRankName = "Field Marshal";
-            else
-                KalimdorRankName = "Warlord";
-            break;
-        case 14:
-            if (GetTeam() == ALLIANCE)
-                KalimdorRankName = "Grand Marshal";
-            else
-                KalimdorRankName = "High Warlord";
-            break;
-        }
-
         newrank += 4;
 
         if (newrank != KalimdorRank)
         {
-            ChatHandler(this).PSendSysMessage("You are kalimdorrank %u - %s!",newrank-4, KalimdorRankName.c_str());
+            ChatHandler(this).PSendSysMessage("You are kalimdorrank %u - %s!",newrank-4, sWorld.GetKalimdorRankName(newrank-4,GetTeam()).c_str());
         }
         KalimdorRank = newrank;
         TenSTimer = 0;
@@ -17065,8 +16973,8 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     // not check level requiremnt for normal items (PvP related bonus items is another case)
     if(pProto->RequiredHonorRank && (KalimdorRank < (uint8)pProto->RequiredHonorRank || getLevel() < pProto->RequiredLevel) )
     {
-        ChatHandler(this).PSendSysMessage("You need KalimdorRank %u to buy this item.",pProto->RequiredHonorRank-4);
-        ChatHandler(this).PSendSysMessage("You have rank %u and can check it with .getrank",KalimdorRank-4);
+        ChatHandler(this).PSendSysMessage("You need KalimdorRank %u %s to buy this item.",pProto->RequiredHonorRank-4, sWorld.GetKalimdorRankName(pProto->RequiredHonorRank-4,GetTeam()).c_str());
+        ChatHandler(this).PSendSysMessage("You have rank %u %s and can check it with .getrank",KalimdorRank-4, sWorld.GetKalimdorRankName(KalimdorRank-4,GetTeam()).c_str());
         SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
         return false;
     }

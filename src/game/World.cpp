@@ -2129,3 +2129,99 @@ bool World::configNoReload(bool reload, eConfigBoolValues index, char const* fie
 
     return false;
 }
+
+std::string World::GetKalimdorRankName(uint32 rank, Team team)
+{
+    std::string KalimdorRankName = "";
+    switch(rank)
+    {
+    case 0:
+        KalimdorRankName = "Newbie";
+        break;
+    case 1:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Private";
+        else
+            KalimdorRankName = "Scout";
+        break;
+    case 2:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Corporal";
+        else
+            KalimdorRankName = "Grunt";
+        break;
+    case 3:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Sergeant";
+        else
+            KalimdorRankName = "Sergeant";
+        break;
+    case 4:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Master Sergeant";
+        else
+            KalimdorRankName = "Senior Sergeant";
+        break;
+    case 5:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Sergeant Major";
+        else
+            KalimdorRankName = "First Sergeant";
+        break;
+    case 6:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Knight";
+        else
+            KalimdorRankName = "Stone Guard";
+        break;
+    case 7:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Knight-Lieutenant";
+        else
+            KalimdorRankName = "Blood Guard";
+        break;
+    case 8:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Knight-Captain";
+        else
+            KalimdorRankName = "Legionnaire";
+        break;
+    case 9:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Knight-Champion";
+        else
+            KalimdorRankName = "Centurion";
+        break;
+    case 10:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Lieutenant Commander";
+        else
+            KalimdorRankName = "Champion";
+        break;
+    case 11:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Commander";
+        else
+            KalimdorRankName = "Lieutenant General";
+        break;
+    case 12:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Marshal";
+        else
+            KalimdorRankName = "General";
+        break;
+    case 13:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Field Marshal";
+        else
+            KalimdorRankName = "Warlord";
+        break;
+    case 14:
+        if (team == ALLIANCE)
+            KalimdorRankName = "Grand Marshal";
+        else
+            KalimdorRankName = "High Warlord";
+        break;
+    }
+    return KalimdorRankName;
+}

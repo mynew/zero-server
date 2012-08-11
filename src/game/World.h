@@ -387,6 +387,7 @@ class World
         void AddSession(WorldSession *s);
         bool RemoveSession(uint32 id);
         /// Get the number of current active sessions
+        std::string GetKalimdorRankName(uint32 rank, Team team);
         void UpdateMaxSessionCounters();
         uint32 GetActiveAndQueuedSessionCount() const { return m_sessions.size(); }
         uint32 GetActiveSessionCount() const { return m_sessions.size() - m_QueuedSessions.size(); }

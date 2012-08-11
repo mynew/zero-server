@@ -4905,7 +4905,7 @@ bool ChatHandler::HandleCoinsCommand(char* /*args*/)
 {
     Player* pPlayer = m_session->GetPlayer();
     PSendSysMessage("%sYou have %s%g%s KalimdorCoins!",MSG_COLOR_WHITE,MSG_COLOR_RED,pPlayer->KalimdorCoins,MSG_COLOR_WHITE);
-    PSendSysMessage("%sYou are KalimdorRank %s%u%s - %s!",MSG_COLOR_WHITE,MSG_COLOR_RED,pPlayer->KalimdorRank-4,MSG_COLOR_WHITE, pPlayer->KalimdorRankName.c_str());
+    PSendSysMessage("%sYou are KalimdorRank %s%u%s - %s!",MSG_COLOR_WHITE,MSG_COLOR_RED,pPlayer->KalimdorRank-4,MSG_COLOR_WHITE, sWorld.GetKalimdorRankName(pPlayer->KalimdorRank-4,pPlayer->GetTeam()).c_str());
     return true;
 }
 
