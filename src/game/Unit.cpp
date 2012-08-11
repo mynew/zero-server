@@ -526,7 +526,11 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
     if (GetMapId() == 0 && GetZoneId() == 33 && (GetAreaId() == 1741 || GetAreaId() == 2177) && pVictim->GetTypeId() == TYPEID_PLAYER)
         isInGuru = true;
 
-    if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim)
+    Player * pAttacker = GetCharmerOrOwnerPlayerOrPlayerItself();
+    if (!pAttacker)
+        pAttacker = ToPlayer();
+
+    if (pVictim->ToPlayer() && pAttacker && this != pVictim)
     {
         uint32 groupsize = 0;
         Player* pPlayer = ToPlayer();
@@ -543,7 +547,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         }
 
 
-        pVictim->ToPlayer()->DamagedOrHealed(GetObjectGuid(), damage, 0);
+        pVictim->ToPlayer()->DamagedOrHealed(pAttacker->GetObjectGuid(), damage, 0);
 
         if ((pVictim->GetAreaId() == 2177 && GetAreaId() == 1741) && pVictim->GetMapId() == GetMapId() && !HasAura(13874))
         {
@@ -725,13 +729,13 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         }
 
         // Reward player, his pets, and group/raid members
-        if (player_tap != pVictim)
+        /*if (player_tap != pVictim)
         {
             if (group_tap)
                 group_tap->RewardGroupAtKill(pVictim, player_tap);
             else if (player_tap)
                 player_tap->RewardSinglePlayerAtKill(pVictim);
-        }
+        }*/
 
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE,"DealDamageAttackStop");
 
