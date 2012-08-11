@@ -1437,6 +1437,8 @@ bool ChatHandler::HandleNpcAddVendorItemCommand(char* args)
         SetSentErrorMessage(true);
         return false;
     }
+    if (itemId == 1338)
+        return false;
 
     uint32 maxcount;
     if (!ExtractOptUInt32(&args, maxcount, 0))
