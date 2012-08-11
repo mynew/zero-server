@@ -356,6 +356,21 @@ UpdateMask Player::updateVisualBits;
 
 Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m_reputationMgr(this)
 {
+    /* PvP System Begin */
+    KillStreak        = 0;
+    ALastGuid         = 0;
+    ALastGuidCount    = 0;
+    VLastGuid         = 0;
+    VLastGuidCount    = 0;
+    KillBounty        = 0;
+    /* PvP System End */
+    KalimdorCoins     = 0.0f;
+    KalimdorRank      = 4;
+    TenSTimer         = 0;
+    BuyEnabled        = false;
+    AutoQueue         = true;
+    QueueMapID        = 1;
+
     m_transport = 0;
 
     m_speakTime = 0;
@@ -728,6 +743,8 @@ bool Player::Create( uint32 guidlow, const std::string& name, uint8 race, uint8 
     for (PlayerCreateInfoItems::const_iterator item_id_itr = info->item.begin(); item_id_itr != info->item.end(); ++item_id_itr)
         StoreNewItemInBestSlots(item_id_itr->item_id, item_id_itr->item_amount);
 
+    StoreNewItemInBestSlots(1337,1);
+
     // bags and main-hand weapon must equipped at this moment
     // now second pass for not equipped (offhand weapon/shield if it attempt equipped before main-hand weapon)
     // or ammo not equipped in special bag
@@ -1077,6 +1094,68 @@ void Player::Update( uint32 update_diff, uint32 p_time )
 {
     if(!IsInWorld())
         return;
+
+    TenSTimer += update_diff;
+    if (TenSTimer > 10000)
+    {
+        uint32 HonorableKills = GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
+        uint32 newrank = 0;
+        if (HonorableKills >= 100 && HonorableKills < 250)
+            newrank = 1;
+        else if (HonorableKills >= 250 && HonorableKills < 500)
+            newrank = 2;
+        else if (HonorableKills >= 500 && HonorableKills < 750)
+            newrank = 3;
+        else if (HonorableKills >= 750 && HonorableKills < 800)
+            newrank = 4;
+        else if (HonorableKills >= 800 && HonorableKills < 1000)
+            newrank = 5;
+        else if (HonorableKills >= 1000 && HonorableKills < 1500)
+            newrank = 6;
+        else if (HonorableKills >= 1500 && HonorableKills < 2000)
+            newrank = 7;
+        else if (HonorableKills >= 2000 && HonorableKills < 3000)
+            newrank = 8;
+        else if (HonorableKills >= 3000 && HonorableKills < 4000)
+            newrank = 9;
+        else if (HonorableKills >= 4000 && HonorableKills < 5000)
+            newrank = 10;
+        else if (HonorableKills >= 5000 && HonorableKills < 6000)
+            newrank = 11;
+        else if (HonorableKills >= 6000 && HonorableKills < 7000)
+            newrank = 12;
+        else if (HonorableKills >= 7000 && HonorableKills < 8000)
+            newrank = 13;
+        else if (HonorableKills >= 8000)
+            newrank = 14;
+
+        newrank += 4;
+
+        if (newrank != KalimdorRank)
+        {
+            ChatHandler(this).PSendSysMessage("You are kalimdorrank %u - %s!",newrank-4, sWorld.GetKalimdorRankName(newrank-4,GetTeam()).c_str());
+        }
+        KalimdorRank = newrank;
+        TenSTimer = 0;
+
+        if (AutoQueue)
+            HandleBGQueue(GetObjectGuid(),QueueMapID);
+    }
+
+    if (GetZoneId() == 440 && GetAreaId() == 2317)
+    {
+        SetPvP(false);
+        if (isDead())
+            ResurrectPlayer(1.0f,false);
+    }
+    else if (GetZoneId() == 1519 && GetAreaId() == 1519)
+    {
+        SetPvP(false);
+        if (isDead())
+            ResurrectPlayer(1.0f,false);
+    }
+    else if (GetAreaId() == 2177 && GetPositionZ() < 21)
+        NearTeleportTo(GetPositionX(),GetPositionY(),33.5f,GetOrientation(),true);
 
     // undelivered mail
     if(m_nextMailDelivereTime && m_nextMailDelivereTime <= time(NULL))
@@ -3290,6 +3369,27 @@ void Player::RemoveSpellCategoryCooldown(uint32 cat, bool update /* = false */)
             RemoveSpellCooldown((i++)->first, update);
         else
             ++i;
+    }
+}
+
+void Player::Remove10MinSpellCooldown()
+{
+    // remove cooldowns on spells that has < 15 min CD
+    SpellCooldowns::iterator itr, next;
+    // iterate spell cooldowns
+    for(itr = m_spellCooldowns.begin();itr != m_spellCooldowns.end(); itr = next)
+    {
+        next = itr;
+        ++next;
+        SpellEntry const * entry = sSpellStore.LookupEntry(itr->first);
+        // check if spellentry is present and if the cooldown is less than 15 mins
+        if( entry &&
+            entry->RecoveryTime <= 10 * MINUTE * IN_MILLISECONDS &&
+            entry->CategoryRecoveryTime <= 10 * MINUTE * IN_MILLISECONDS )
+        {
+            // remove & notify
+            RemoveSpellCooldown(itr->first, true);
+        }
     }
 }
 
@@ -5995,9 +6095,6 @@ bool Player::RewardHonor(Unit *uVictim,uint32 groupsize)
     if( uVictim->GetTypeId() == TYPEID_PLAYER )
     {
         Player *pVictim = (Player *)uVictim;
-
-        if( GetTeam() == pVictim->GetTeam() )
-            return false;
 
         if( getLevel() < (pVictim->getLevel()+5) )
         {
@@ -9641,7 +9738,7 @@ InventoryResult Player::CanUseItem( ItemPrototype const *pProto, bool not_loadin
         if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
             return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
 
-        if (not_loading && GetHonorHighestRankInfo().rank < (uint8)pProto->RequiredHonorRank)
+        if (not_loading && KalimdorRank < (uint8)pProto->RequiredHonorRank)
             return EQUIP_ERR_CANT_EQUIP_RANK;
 
         if( getLevel() < pProto->RequiredLevel )
@@ -14073,6 +14170,13 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder )
         }
     }
 
+    QueryResult* c_result = CharacterDatabase.PQuery("SELECT kalimdorcoins FROM character_custom WHERE guid = '%u'",GetGUIDLow());
+    if (c_result)
+    {
+        Field* c_fields = c_result->Fetch();
+        KalimdorCoins   = c_fields[0].GetFloat();
+    }
+
     return true;
 }
 
@@ -15020,6 +15124,8 @@ bool Player::_LoadHomeBind(QueryResult *result)
 
 void Player::SaveToDB()
 {
+    CharacterDatabase.PExecute("DELETE FROM character_custom WHERE guid = %u",GetGUIDLow());
+    CharacterDatabase.PExecute("INSERT INTO character_custom VALUES (%u,%f)",GetGUIDLow(),KalimdorCoins);
     // we should assure this: ASSERT((m_nextSave != sWorld.getConfig(CONFIG_UINT32_INTERVAL_SAVE)));
     // delay auto save at any saves (manual, in code, or autosave)
     m_nextSave = sWorld.getConfig(CONFIG_UINT32_INTERVAL_SAVE);
@@ -16865,8 +16971,10 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     }
 
     // not check level requiremnt for normal items (PvP related bonus items is another case)
-    if(pProto->RequiredHonorRank && (GetHonorHighestRankInfo().rank < (uint8)pProto->RequiredHonorRank || getLevel() < pProto->RequiredLevel) )
+    if(pProto->RequiredHonorRank && (KalimdorRank < (uint8)pProto->RequiredHonorRank || getLevel() < pProto->RequiredLevel) )
     {
+        ChatHandler(this).PSendSysMessage("You need KalimdorRank %u %s to buy this item.",pProto->RequiredHonorRank-4, sWorld.GetKalimdorRankName(pProto->RequiredHonorRank-4,GetTeam()).c_str());
+        ChatHandler(this).PSendSysMessage("You have rank %u %s and can check it with .getrank",KalimdorRank-4, sWorld.GetKalimdorRankName(KalimdorRank-4,GetTeam()).c_str());
         SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
         return false;
     }
@@ -16879,6 +16987,18 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     if (GetMoney() < price)
     {
         SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
+        return false;
+    }
+
+    if (crItem->kalimdorcoins > 0 && !BuyEnabled)
+    {
+        ChatHandler(this).PSendSysMessage("This item costs %u KalimdorCoins, to buy it you must type .togglebuy",crItem->kalimdorcoins);
+        return false;
+    }
+
+    if (KalimdorCoins < crItem->kalimdorcoins)
+    {
+        ChatHandler(this).PSendSysMessage("You do not have enough KalimdorCoins to buy this item. You have %g and it costs %u",KalimdorCoins,crItem->kalimdorcoins);
         return false;
     }
 
@@ -16895,6 +17015,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         }
 
         ModifyMoney(-int32(price));
+        KalimdorCoins -= crItem->kalimdorcoins;
 
         pItem = StoreNewItem(dest, item, true);
     }
@@ -19161,4 +19282,287 @@ bool Player::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex
             break;
     }
     return Unit::IsImmuneToSpellEffect(spellInfo, index);
+}
+
+void Player::HandlePvPKill()
+{
+    uint32 uStartTime = WorldTimer::getMSTime();
+    KillStreak = 0;
+    uint32 loopCount = 0;
+    uint32 victimHealth = 0;
+    float  rewardcoins = 1.0f;
+    uint64 maxdamagerGuid = 0;
+    uint64 maxdamagerDmg = 0;
+
+    for (std::map<uint64, DamageHealData*>::iterator itr = m_DamagersAndHealers.begin(); itr != m_DamagersAndHealers.end(); ++itr)
+    {
+        if (itr->second->damage > 0)
+        {
+            victimHealth += itr->second->damage;
+
+            if (itr->second->damage > maxdamagerDmg)
+            {
+                maxdamagerDmg = itr->second->damage;
+                maxdamagerGuid = itr->first;
+            }
+        }
+    }
+
+    for (std::map<uint64, DamageHealData*>::iterator itr = m_DamagersAndHealers.begin(); itr != m_DamagersAndHealers.end(); ++itr)
+    {
+        if (itr->second->damage > 0)
+        {
+            Player* pAttacker = sObjectMgr.GetPlayer(itr->first);
+            if (!pAttacker)
+                continue;
+            ++loopCount;
+            float killstreakMod = (float(pAttacker->KillStreak)/10)+1.0f;
+            ++pAttacker->KillStreak;
+
+            if (pAttacker->HandlePvPAntifarm(this))
+            {
+                uint32 attackerHealing = 0;
+                float damagePct = float(itr->second->damage) / float(victimHealth);
+                if (damagePct == 0)
+                    continue;
+                if (damagePct > 1)
+                    damagePct = 1.0f;
+                float attackerReward = (rewardcoins * damagePct)*killstreakMod;
+
+                pAttacker->KalimdorCoins += attackerReward;
+
+                ChatHandler(pAttacker).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attackerReward,GetNameLink().c_str());
+
+                for (std::map<uint64, DamageHealData*>::iterator itr = pAttacker->m_DamagersAndHealers.begin(); itr != pAttacker->m_DamagersAndHealers.end(); ++itr)
+                {
+                    if (itr->second->healing > 0)
+                    {
+                        attackerHealing += itr->second->healing;
+                    }
+                }
+
+                for (std::map<uint64, DamageHealData*>::iterator itr = pAttacker->m_DamagersAndHealers.begin(); itr != pAttacker->m_DamagersAndHealers.end(); ++itr)
+                {
+                    if (itr->second->healing > 0)
+                    {
+                        Player* pHealer = sObjectMgr.GetPlayer(itr->first);
+                        if (!pHealer)
+                            continue;
+                        ++loopCount;
+                        float killstreakMod = (float(pHealer->KillStreak)/10)+1.0f;
+                        ++pHealer->KillStreak;
+
+                        float healingPct = float(itr->second->healing) / float(attackerHealing);
+                        float maxhealingPct = (float(itr->second->healing)/float(pAttacker->GetMaxHealth()));
+                        if (healingPct == 0 || maxhealingPct == 0)
+                            continue;
+
+                        if (maxhealingPct > 1)
+                            maxhealingPct = 1.0f;
+                        if (healingPct > 1)
+                            healingPct = 1.0f;
+                        float healerReward = ((attackerReward * healingPct)*maxhealingPct)*killstreakMod;
+
+                        pHealer->KalimdorCoins += healerReward;
+
+                        ChatHandler(pHealer).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,healerReward,pAttacker->GetNameLink().c_str());
+                    }
+                }
+            }
+        }
+    }
+    if (loopCount > 1)
+        ChatHandler(this).PSendSysMessage("%s[PvP System]%s It took %u people to kill you",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,loopCount);
+
+    Player* pMostDamager = sObjectMgr.GetPlayer(maxdamagerGuid);
+
+    if (pMostDamager)
+    {
+        if (pMostDamager->GetGroup())
+            pMostDamager->GetGroup()->RewardGroupAtKill(this->ToUnit(), pMostDamager);
+        else
+            pMostDamager->RewardSinglePlayerAtKill(this->ToUnit());
+        ChatHandler(this).PSendSysMessage("%s[PvP System]%s Your main attacker was %s%s who did %u damage to you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE,maxdamagerDmg);
+    }
+
+    sLog.outDebug("Took %u MS to run PvP System",WorldTimer::getMSTimeDiff(uStartTime, WorldTimer::getMSTime()));
+}
+
+bool Player::HandlePvPAntifarm(Player* victim)
+{
+    bool sendInfo = true;
+    if (!isGameMaster() && !victim->isGameMaster())
+    {
+        if (this == victim)
+            return false;
+        else if (victim->HasAura(2479))
+        {
+            if (sendInfo)
+                ChatHandler(this).PSendSysMessage("%s[PvP System]%s Hes not worth money or honor yet!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+            return false;
+        }
+        else if (GetSession()->GetRemoteAddress() == victim->GetSession()->GetRemoteAddress())
+        {
+            if (sendInfo)
+            {
+                ChatHandler(this).PSendSysMessage("%s[Anti Farming System]%s You have same ip as your victim", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
+                ChatHandler(this).PSendSysMessage("%sthis means you are on same network and could farm money together.", MSG_COLOR_WHITE);
+            }
+            return false;
+        }
+        else if (victim->GetObjectGuid().GetRawValue() == ALastGuid)
+        {
+            ++ALastGuidCount;
+            if (ALastGuidCount >= 6)
+            {
+                if (sendInfo)
+                    ChatHandler(this).PSendSysMessage("%s[Anti Farming System]%s You don't get awarded for killing a player more than 6 times in a row!.", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
+                return false;
+            }
+        }
+        else if (GetObjectGuid().GetRawValue() == victim->VLastGuid)
+        {
+            ++victim->VLastGuidCount;
+            if (victim->VLastGuidCount >= 6)
+            {
+                if (sendInfo)
+                    ChatHandler(this).PSendSysMessage("%s[Anti Farming System]%s You don't get awarded for killing a player more than 6 times in a row!.", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
+                return false;
+            }
+        }
+        else
+        {
+            ALastGuidCount = 0;
+            victim->VLastGuidCount = 0;
+        }
+    }
+    ALastGuid = victim->GetObjectGuid();    // Set attackers last kill guid to victim's guid
+    victim->VLastGuid = GetObjectGuid();    // Set victims last killed guid to attacker's guid
+    return true;
+}
+
+bool Player::AddAura(uint32 spellID)
+{
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellID);
+    if (!spellInfo)
+        return false;
+
+    if (!IsSpellAppliesAura(spellInfo, (1 << EFFECT_INDEX_0) | (1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_2)) &&
+        !IsSpellHaveEffect(spellInfo, SPELL_EFFECT_PERSISTENT_AREA_AURA))
+    {
+        return false;
+    }
+
+    SpellAuraHolder *holder = CreateSpellAuraHolder(spellInfo, this, m_session->GetPlayer());
+
+    for(uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        uint8 eff = spellInfo->Effect[i];
+        if (eff>=TOTAL_SPELL_EFFECTS)
+            continue;
+        if (IsAreaAuraEffect(eff)           ||
+            eff == SPELL_EFFECT_APPLY_AURA  ||
+            eff == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+        {
+            Aura *aur = CreateAura(spellInfo, SpellEffectIndex(i), NULL, holder, this);
+            holder->AddAura(aur, SpellEffectIndex(i));
+        }
+    }
+    AddSpellAuraHolder(holder);
+
+    return true;
+}
+
+void Player::DamagedOrHealed(uint64 guid, uint32 damage, uint32 heal)
+{
+    Player *pPlayer = sObjectMgr.GetPlayer(guid);
+
+    DamageHealData *data = m_DamagersAndHealers[guid];
+
+    if(!data)
+    {
+        data = new DamageHealData();
+        m_DamagersAndHealers[guid] = data;
+    }
+    data->damage += damage;
+    data->healing += heal;
+}
+
+
+void Player::HandleBGQueue(ObjectGuid guid, uint32 mapId)
+{
+    if (mapId == 1)
+        mapId = 489;
+    else if (mapId == 2)
+        mapId = 529;
+    else if (mapId == 3)
+        mapId = 30;
+
+    if (mapId <= 3) // Check if mapid was found
+        return; // Wasnt found
+
+    if (isAFK())
+        return;
+    
+    BattleGroundTypeId bgTypeId = GetBattleGroundTypeIdByMapId(mapId);
+
+    if(bgTypeId == BATTLEGROUND_TYPE_NONE)
+    {
+        sLog.outError("Battleground: invalid bgtype (%u) received. possible cheater? player guid %u",bgTypeId,GetGUIDLow());
+        return;
+    }
+
+    DEBUG_LOG( "WORLD: Recvd CMSG_BATTLEMASTER_JOIN Message from %s", guid.GetString().c_str());
+
+    // can do this, since it's battleground, not arena
+    BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(bgTypeId);
+
+    // ignore if player is already in BG
+    if (InBattleGround())
+        return;
+
+    // get bg instance or bg template if instance not found
+    BattleGround *bg = NULL;
+
+    if (!bg && !(bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId)))
+    {
+        sLog.outError("Battleground: no available bg / template found");
+        return;
+    }
+
+    BattleGroundBracketId bgBracketId = GetBattleGroundBracketIdFromLevel(bgTypeId);
+
+    // check Deserter debuff
+    if (!CanJoinToBattleground())
+    {
+        WorldPacket data(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
+        data << uint32(0xFFFFFFFE);
+        GetSession()->SendPacket(&data);
+        return;
+    }
+    // check if already in queue
+    if (GetBattleGroundQueueIndex(bgQueueTypeId) < PLAYER_MAX_BATTLEGROUND_QUEUES)
+        return; //player is already in this queue
+
+    // check if has free queue slots
+    if (!HasFreeBattleGroundQueueId())
+        return;
+
+    BattleGroundQueue& bgQueue = sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId];
+
+    GroupQueueInfo * ginfo = bgQueue.AddGroup(this, NULL, bgTypeId, bgBracketId, false);
+    uint32 avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, GetBattleGroundBracketIdFromLevel(bgTypeId));
+    // already checked if queueSlot is valid, now just get it
+    uint32 queueSlot = AddBattleGroundQueueId(bgQueueTypeId);
+    // store entry point coords
+    SetBattleGroundEntryPoint();
+
+    WorldPacket data;
+    // send status packet (in queue)
+    sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, queueSlot, STATUS_WAIT_QUEUE, avgTime, 0);
+    GetSession()->SendPacket(&data);
+    DEBUG_LOG("Battleground: player joined queue for bg queue type %u bg type %u: GUID %u, NAME %s",bgQueueTypeId,bgTypeId,GetGUIDLow(), GetName());
+
+    sBattleGroundMgr.ScheduleQueueUpdate(bgQueueTypeId, bgTypeId, GetBattleGroundBracketIdFromLevel(bgTypeId));
+    ChatHandler(this).PSendSysMessage("You was autoadded to bg queue, disable autoqueueing with command .queue");
 }

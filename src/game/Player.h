@@ -839,6 +839,13 @@ class TradeData
         ObjectGuid m_items[TRADE_SLOT_COUNT];               // traded itmes from m_player side including non-traded slot
 };
 
+struct DamageHealData
+{
+    DamageHealData() : damage(0), healing(0) { }
+    uint32 damage;
+    uint32 healing;
+};
+
 class MANGOS_DLL_SPEC Player : public Unit
 {
     friend class WorldSession;
@@ -847,6 +854,36 @@ class MANGOS_DLL_SPEC Player : public Unit
     public:
         explicit Player (WorldSession *session);
         ~Player ( );
+
+        /* PvP System Begin */
+        uint32 KillStreak;
+        uint32 ALastGuid;
+        uint32 ALastGuidCount;
+        uint32 VLastGuid;
+        uint32 VLastGuidCount;
+        uint32 KillBounty;
+        /* PvP System End */
+        float KalimdorCoins;
+        uint32 KalimdorRank;
+        uint32 TenSTimer;
+        bool BuyEnabled;
+        bool AutoQueue;
+        uint32 QueueMapID;
+
+        void HandlePvPKill();
+        bool HandlePvPAntifarm(Player* victim);
+        std::map<uint64, DamageHealData*> m_DamagersAndHealers;
+        void DamagedOrHealed(uint64 guid, uint32 damage, uint32 heal);
+        void HandleBGQueue(ObjectGuid guid, uint32 mapId);
+        Unit* ToUnit(){ return reinterpret_cast<Unit*>(this); }
+
+        bool AddAura(uint32 spellID);
+
+        std::string GetNameLink()
+        {
+            std::string name = GetName();
+            return "|Hplayer:"+name+"|h["+name+"]|h";
+        }
 
         void CleanupsBeforeDelete();
 
@@ -1416,6 +1453,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         GlobalCooldownMgr& GetGlobalCooldownMgr() { return m_GlobalCooldownMgr; }
 
+        void Remove10MinSpellCooldown();
         void RemoveAllSpellCooldown();
         void _LoadSpellCooldowns(QueryResult *result);
         void _SaveSpellCooldowns();

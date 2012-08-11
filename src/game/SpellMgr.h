@@ -708,6 +708,7 @@ struct SpellChainNode
 
 typedef UNORDERED_MAP<uint32, SpellChainNode> SpellChainMap;
 typedef std::multimap<uint32, uint32> SpellChainMapNext;
+typedef UNORDERED_MAP<uint32, uint32> SpellDisabledMap;
 
 // Spell learning properties (accessed using SpellMgr functions)
 struct SpellLearnSkillNode
@@ -990,6 +991,8 @@ class SpellMgr
 
         bool IsSkillBonusSpell(uint32 spellId) const;
 
+        bool IsSpellDisabled(uint32 spellId) const;
+
 
         // Spell script targets
         SpellScriptTargetBounds GetSpellScriptTargetBounds(uint32 spell_id) const
@@ -1072,6 +1075,7 @@ class SpellMgr
         void LoadSpellPetAuras();
         void LoadSpellAreas();
         void LoadFacingCasterFlags();
+        void LoadSpellDisabledEntrys();
 
     private:
         SpellScriptTarget  mSpellScriptTarget;
@@ -1096,6 +1100,7 @@ class SpellMgr
         SpellAreaForAuraMap  mSpellAreaForAuraMap;
         SpellAreaForAreaMap  mSpellAreaForAreaMap;
         SpellFacingFlagMap  mSpellFacingFlagMap;
+        SpellDisabledMap  mSpellDisabled;
 };
 
 #define sSpellMgr SpellMgr::Instance()

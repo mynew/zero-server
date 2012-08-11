@@ -328,7 +328,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->RequiredSkill;
         data << pProto->RequiredSkillRank;
         data << pProto->RequiredSpell;
-        data << pProto->RequiredHonorRank;
+        data << 0;
         data << pProto->RequiredCityRank;
         data << pProto->RequiredReputationFaction;
         data << (pProto->RequiredReputationFaction > 0  ? pProto->RequiredReputationRank : 0 );  // send value only if reputation faction id setted ( needed for some items)
@@ -772,10 +772,16 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
                 data << uint32(count);
                 data << uint32(crItem->item);
                 data << uint32(pProto->DisplayInfoID);
-                data << uint32(crItem->maxcount <= 0 ? 0xFFFFFFFF : pCreature->GetVendorItemCurrentCount(crItem));
+                if (crItem->maxcount > 0)
+                    data << uint32(crItem->maxcount <= 0 ? 0xFFFFFFFF : pCreature->GetVendorItemCurrentCount(crItem));
+                else
+                    data << uint32(crItem->kalimdorcoins);
                 data << uint32(price);
                 data << uint32(pProto->MaxDurability);
-                data << uint32(pProto->BuyCount);
+                if (pProto->BuyCount <= 1)
+                    data << uint32(pProto->RequiredHonorRank-4);
+                else
+                    data << uint32(pProto->BuyCount);
             }
         }
     }
