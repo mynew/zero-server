@@ -50,6 +50,7 @@
 #include "DBCStores.h"
 #include "VMapFactory.h"
 #include "MovementGenerator.h"
+#include "Chat.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -521,6 +522,43 @@ void Unit::DealDamageMods(Unit *pVictim, uint32 &damage, uint32* absorb)
 
 uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const *spellProto, bool durabilityLoss)
 {
+    bool isInGuru = false;
+    if (GetMapId() == 0 && GetZoneId() == 33 && (GetAreaId() == 1741 || GetAreaId() == 2177) && pVictim->GetTypeId() == TYPEID_PLAYER)
+        isInGuru = true;
+
+    Player * pAttacker = GetCharmerOrOwnerPlayerOrPlayerItself();
+    if (!pAttacker)
+        pAttacker = ToPlayer();
+
+    if (pVictim->ToPlayer() && pAttacker && this != pVictim)
+    {
+        uint32 groupsize = 0;
+        Player* pPlayer = ToPlayer();
+        if (isInGuru && pPlayer && pPlayer->GetGroup())
+        {
+            for(GroupReference *itr = pPlayer->GetGroup()->GetFirstMember(); itr != NULL; itr = itr->next())
+                groupsize ++;
+
+            if (groupsize > 2)
+            {
+                pPlayer->GetGroup()->RemoveMember(pPlayer->GetObjectGuid(),1);
+                ChatHandler(pPlayer).PSendSysMessage("You was removed from the group, we do not allow groups bigger then 2 in Gurubashi Arena.");
+            }
+        }
+
+
+        pVictim->ToPlayer()->DamagedOrHealed(pAttacker->GetObjectGuid(), damage, 0);
+
+        if ((pVictim->GetAreaId() == 2177 && GetAreaId() == 1741) && pVictim->GetMapId() == GetMapId() && !HasAura(13874))
+        {
+            CastSpell(this,25686,true);
+            ChatHandler(this->ToPlayer()).PSendSysMessage("There will be no camping here!");
+        }
+    }
+
+    if (pVictim->HasAura(11958))
+        return damage;
+
     // remove affects from victim (including from 0 damage and DoTs)
     if(pVictim != this)
         pVictim->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
@@ -646,6 +684,11 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
     if (health <= damage)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE,"DealDamage: victim just died");
+        /***********************************PVP SYSTEM BEGIN***********************************/
+        if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER)
+            if (pVictim->ToPlayer())
+                pVictim->ToPlayer()->HandlePvPKill();
+        /***********************************PVP SYSTEM END***********************************/
 
         // find player: owner of controlled `this` or `this` itself maybe
         // for loot will be sued only if group_tap==NULL
@@ -686,13 +729,13 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         }
 
         // Reward player, his pets, and group/raid members
-        if (player_tap != pVictim)
+        /*if (player_tap != pVictim)
         {
             if (group_tap)
                 group_tap->RewardGroupAtKill(pVictim, player_tap);
             else if (player_tap)
                 player_tap->RewardSinglePlayerAtKill(pVictim);
-        }
+        }*/
 
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE,"DealDamageAttackStop");
 
@@ -718,7 +761,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             }
         }
 
-        if (!spiritOfRedemtionTalentReady)
+        if (!spiritOfRedemtionTalentReady && !isInGuru)
         {
             DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE,"SET JUST_DIED");
             pVictim->SetDeathState(JUST_DIED);
@@ -741,6 +784,35 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
             // FORM_SPIRITOFREDEMPTION and related auras
             pVictim->CastSpell(pVictim,27827,true,NULL,spiritOfRedemtionTalentReady);
+        }
+        else if (isInGuru) // Gurubashi Arena respawn
+        {
+            Player *pPlayer = pVictim->ToPlayer();
+            if(pPlayer)
+            {
+                pPlayer->ResurrectPlayer(1);
+                pPlayer->Remove10MinSpellCooldown();
+                pPlayer->AddAura(13874); // Divine Shield
+                pPlayer->AddAura(22666); // Silence
+                pPlayer->AddAura(22691); // Disarm
+
+                uint32 rand = urand(1,6);
+                if (pPlayer->isGameMaster())
+                    ChatHandler(ToPlayer()).PSendSysMessage("You are being teleported to %u",rand);
+
+                if (rand == 1)
+                    pPlayer->TeleportTo(0,-13257.1f, 223.449f,   42.9766f,   0.681904f);
+                else if (rand == 2)
+                    pPlayer->TeleportTo(0,-13275.8f, 273.544f,   42.9771f,   6.28179f);
+                else if (rand == 3)
+                    pPlayer->TeleportTo(0,-13172.3f, 334.561f,   42.9781f,   4.21775f);
+                else if (rand == 4)
+                    pPlayer->TeleportTo(0,-13164.9f, 214.171f,   42.9779f,   2.16786f);
+                else if (rand == 5)
+                    pPlayer->TeleportTo(0,-13215.6f, 202.368f,   42.975f,    1.461f);
+                else if (rand == 6) // Inside the arena
+                    pPlayer->TeleportTo(0,-13222.7f, 239.171f,   21.8581f,   1.09186f);
+            }
         }
         else
             pVictim->SetHealth(0);
@@ -5156,7 +5228,30 @@ void Unit::UnsummonAllTotems()
 
 int32 Unit::DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellProto, bool critical)
 {
+    bool isInGuru = false;
+    if (GetMapId() == 0 && GetZoneId() == 33 && (GetAreaId() == 1741 || GetAreaId() == 2177))
+        isInGuru = true;
+
+    if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim)
+    {
+        Player* pPlayer = ToPlayer();
+        uint32 groupsize = 0;
+        if (isInGuru && pPlayer && pPlayer->GetGroup())
+        {
+            for(GroupReference *itr = pPlayer->GetGroup()->GetFirstMember(); itr != NULL; itr = itr->next())
+                groupsize ++;
+
+            if (groupsize > 2)
+            {
+                ToPlayer()->GetGroup()->RemoveMember(pPlayer->GetObjectGuid(),1);
+                ChatHandler(pPlayer).PSendSysMessage("You was removed from the group, we do not allow groups bigger then 2 in Gurubashi Arena.");
+            }
+        }
+    }
     int32 gain = pVictim->ModifyHealth(int32(addhealth));
+
+    if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim && gain > 0)
+        pVictim->ToPlayer()->DamagedOrHealed(GetObjectGuid(), 0, uint32(gain));
 
     if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->AI())
         ((Creature*)pVictim)->AI()->HealBy(this, addhealth);
@@ -6221,6 +6316,15 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
 void Unit::ClearInCombat()
 {
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        Player *p = ((Player*)this);
+
+        for (std::map<uint64, DamageHealData*>::iterator itr = p->m_DamagersAndHealers.begin(); itr != p->m_DamagersAndHealers.end(); ++itr)
+            delete itr->second;
+        p->m_DamagersAndHealers.clear();
+    }
+
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 

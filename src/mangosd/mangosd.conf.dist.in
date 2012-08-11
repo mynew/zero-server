@@ -629,6 +629,15 @@ LogColors = ""
 #        More mails increase server load but speedup mass mail proccess. Normal tick length: 50 msecs, so 20 ticks in sec and 200 mails in sec by default.
 #        Default: 10
 #
+#    ExternalMail
+#        Enable external mail delivery from mail_external table.
+#        Default: 0 (disabled)
+#                 1 (enabled)
+#
+#    ExternalMail.Interval
+#        Mail delivery delay time for item sending from mail_external table, in minutes.
+#        Default: 1 minute
+#
 #    PetUnsummonAtMount
 #        Persmanent pet will unsummoned at player mount
 #        Default: 0 - not unsummon
@@ -705,6 +714,8 @@ MinPetitionSigns = 9
 MaxGroupXPDistance = 74
 MailDeliveryDelay = 3600
 MassMailer.SendPerTick = 10
+ExternalMail = 0
+ExternalMail.Interval = 1
 PetUnsummonAtMount = 0
 Event.Announce = 0
 BeepAtStart = 1
