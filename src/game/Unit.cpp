@@ -530,7 +530,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
     {
         uint32 groupsize = 0;
         Player* pPlayer = ToPlayer();
-        if (isInGuru && pPlayer->GetGroup())
+        if (isInGuru && pPlayer && pPlayer->GetGroup())
         {
             for(GroupReference *itr = pPlayer->GetGroup()->GetFirstMember(); itr != NULL; itr = itr->next())
                 groupsize ++;
@@ -682,7 +682,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE,"DealDamage: victim just died");
         /***********************************PVP SYSTEM BEGIN***********************************/
         if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER)
-            pVictim->ToPlayer()->HandlePvPKill();
+            if (pVictim->ToPlayer())
+                pVictim->ToPlayer()->HandlePvPKill();
         /***********************************PVP SYSTEM END***********************************/
 
         // find player: owner of controlled `this` or `this` itself maybe
@@ -5231,7 +5232,7 @@ int32 Unit::DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellPro
     {
         Player* pPlayer = ToPlayer();
         uint32 groupsize = 0;
-        if (isInGuru && pPlayer->GetGroup())
+        if (isInGuru && pPlayer && pPlayer->GetGroup())
         {
             for(GroupReference *itr = pPlayer->GetGroup()->GetFirstMember(); itr != NULL; itr = itr->next())
                 groupsize ++;

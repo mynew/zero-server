@@ -19404,8 +19404,10 @@ void Player::HandlePvPKill()
     {
         if (itr->second->damage > 0)
         {
-            ++loopCount;
             Player* pAttacker = sObjectMgr.GetPlayer(itr->first);
+            if (!pAttacker)
+                continue;
+            ++loopCount;
             float killstreakMod = (float(pAttacker->KillStreak)/10)+1.0f;
             ++pAttacker->KillStreak;
 
@@ -19413,6 +19415,8 @@ void Player::HandlePvPKill()
             {
                 uint32 attackerHealing = 0;
                 float damagePct = float(itr->second->damage) / float(victimHealth);
+                if (damagePct == 0)
+                    continue;
                 if (damagePct > 1)
                     damagePct = 1.0f;
                 float attackerReward = (rewardcoins * damagePct)*killstreakMod;
@@ -19433,13 +19437,18 @@ void Player::HandlePvPKill()
                 {
                     if (itr->second->healing > 0)
                     {
-                        ++loopCount;
                         Player* pHealer = sObjectMgr.GetPlayer(itr->first);
+                        if (!pHealer)
+                            continue;
+                        ++loopCount;
                         float killstreakMod = (float(pHealer->KillStreak)/10)+1.0f;
                         ++pHealer->KillStreak;
 
                         float healingPct = float(itr->second->healing) / float(attackerHealing);
                         float maxhealingPct = (float(itr->second->healing)/float(pAttacker->GetMaxHealth()));
+                        if (healingPct == 0 || maxhealingPct == 0)
+                            continue;
+
                         if (maxhealingPct > 1)
                             maxhealingPct = 1.0f;
                         if (healingPct > 1)
@@ -19462,8 +19471,7 @@ void Player::HandlePvPKill()
     if (pMostDamager)
         ChatHandler(this).PSendSysMessage("%s[PvP System]%s Your main attacker was %s%s who did %u damage to you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE,maxdamagerDmg);
 
-    uint32 uPvPRunTime = WorldTimer::getMSTimeDiff(uStartTime, WorldTimer::getMSTime());
-    sLog.outDebug("Took %u MS to run PvP System",uPvPRunTime);
+    sLog.outDebug("Took %u MS to run PvP System",WorldTimer::getMSTimeDiff(uStartTime, WorldTimer::getMSTime()));
 }
 
 bool Player::HandlePvPAntifarm(Player* victim)
