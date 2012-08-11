@@ -635,6 +635,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     uint32 id, security;
     LocaleConstant locale;
     std::string account;
+    uint32 premium = 0;
     Sha1Hash sha1;
     BigNumber v, s, g, N, K;
     WorldPacket packet, SendAddonPacked;
@@ -778,6 +779,13 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
         return -1;
     }
 
+    QueryResult* premresult = LoginDatabase.PQuery("SELECT premium FROM account_premium WHERE id = '%u' AND active = 1",id);
+    if (premresult) // if account premium
+    {
+        Field* premfield = premresult->Fetch();
+        premium = premfield[0].GetUInt32();
+    }
+
     // Check that Key and account name are the same on client and server
     Sha1Hash sha;
 
@@ -816,7 +824,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     stmt.PExecute(address.c_str(), account.c_str());
 
     // NOTE ATM the socket is single-threaded, have this in mind ...
-    ACE_NEW_RETURN (m_Session, WorldSession (id, this, AccountTypes(security), mutetime, locale), -1);
+    ACE_NEW_RETURN (m_Session, WorldSession (id, this, AccountTypes(security), premium, mutetime, locale), -1);
 
     m_Crypt.SetKey (K.AsByteArray(), 40 );
     m_Crypt.Init ();

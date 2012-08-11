@@ -80,9 +80,9 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 }
 
 /// WorldSession constructor
-WorldSession::WorldSession(uint32 id, WorldSocket *sock, AccountTypes sec, time_t mute_time, LocaleConstant locale) :
+WorldSession::WorldSession(uint32 id, WorldSocket *sock, AccountTypes sec, uint32 premium, time_t mute_time, LocaleConstant locale) :
 m_muteTime(mute_time),
-_player(NULL), m_Socket(sock),_security(sec), _accountId(id), _logoutTime(0),
+_player(NULL), m_Socket(sock),_security(sec), _premium(premium), _accountId(id), _logoutTime(0),
 m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
 m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
 m_latency(0), m_tutorialState(TUTORIALDATA_UNCHANGED)

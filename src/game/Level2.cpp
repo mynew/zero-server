@@ -5019,3 +5019,9 @@ bool ChatHandler::HandleAutoQueueMapCommand(char* args)
     }
     return true;
 }
+
+bool ChatHandler::HandleGetPremiumCommand(char* /*args*/)
+{
+    PSendSysMessage("Premium rank: %u",m_session->GetPremium());
+    return true;
+}
