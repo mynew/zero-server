@@ -551,7 +551,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
         if ((pVictim->GetAreaId() == 2177 && GetAreaId() == 1741) && pVictim->GetMapId() == GetMapId() && !HasAura(13874))
         {
-            CastSpell(this,25686,false);
+            CastSpell(this,25686,true);
             ChatHandler(this->ToPlayer()).PSendSysMessage("There will be no camping here!");
         }
     }
