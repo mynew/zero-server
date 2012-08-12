@@ -1437,6 +1437,8 @@ bool ChatHandler::HandleNpcAddVendorItemCommand(char* args)
         SetSentErrorMessage(true);
         return false;
     }
+    if (itemId == 1338)
+        return false;
 
     uint32 maxcount;
     if (!ExtractOptUInt32(&args, maxcount, 0))
@@ -5017,5 +5019,11 @@ bool ChatHandler::HandleAutoQueueMapCommand(char* args)
         else if (bg == 3)
             PSendSysMessage("You are now autoqueueing for AV");
     }
+    return true;
+}
+
+bool ChatHandler::HandleGetPremiumCommand(char* /*args*/)
+{
+    PSendSysMessage("Premium rank: %u",m_session->GetPremium());
     return true;
 }

@@ -570,6 +570,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleRankReqCommand(char* args);
         bool HandleAutoQueueToggleCommand(char* args);
         bool HandleAutoQueueMapCommand(char* args);
+        bool HandleGetPremiumCommand(char* args);
         bool HandleQuitCommand(char* args);
 
         //! Development Commands

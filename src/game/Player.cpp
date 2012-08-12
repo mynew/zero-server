@@ -6091,14 +6091,15 @@ bool Player::RewardHonor(Unit *uVictim,uint32 groupsize)
             return true;
         }
     }
-    else
-    if( uVictim->GetTypeId() == TYPEID_PLAYER )
+    else if( uVictim->GetTypeId() == TYPEID_PLAYER )
     {
         Player *pVictim = (Player *)uVictim;
 
         if( getLevel() < (pVictim->getLevel()+5) )
         {
             AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
+            if (GetSession()->GetPremium() == 1 || GetSession()->GetPremium() == 3)
+                AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
             return true;
         }
     }
@@ -19329,9 +19330,17 @@ void Player::HandlePvPKill()
                     damagePct = 1.0f;
                 float attackerReward = (rewardcoins * damagePct)*killstreakMod;
 
-                pAttacker->KalimdorCoins += attackerReward;
+                if (pAttacker->GetSession()->GetPremium() == 2 || pAttacker->GetSession()->GetPremium() == 3)
+                {
+                    pAttacker->KalimdorCoins += attackerReward*2;
+                    ChatHandler(pAttacker).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attackerReward*2,GetNameLink().c_str());
 
-                ChatHandler(pAttacker).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attackerReward,GetNameLink().c_str());
+                }
+                else
+                {
+                    pAttacker->KalimdorCoins += attackerReward;
+                    ChatHandler(pAttacker).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attackerReward,GetNameLink().c_str());
+                }
 
                 for (std::map<uint64, DamageHealData*>::iterator itr = pAttacker->m_DamagersAndHealers.begin(); itr != pAttacker->m_DamagersAndHealers.end(); ++itr)
                 {
@@ -19363,9 +19372,16 @@ void Player::HandlePvPKill()
                             healingPct = 1.0f;
                         float healerReward = ((attackerReward * healingPct)*maxhealingPct)*killstreakMod;
 
-                        pHealer->KalimdorCoins += healerReward;
-
-                        ChatHandler(pHealer).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,healerReward,pAttacker->GetNameLink().c_str());
+                        if (pHealer->GetSession()->GetPremium() == 2 || pHealer->GetSession()->GetPremium() == 3)
+                        {
+                            pHealer->KalimdorCoins += healerReward*2;
+                            ChatHandler(pHealer).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,healerReward*2,pAttacker->GetNameLink().c_str());
+                        }
+                        else
+                        {
+                            pHealer->KalimdorCoins += healerReward;
+                            ChatHandler(pHealer).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,healerReward,pAttacker->GetNameLink().c_str());
+                        }
                     }
                 }
             }

@@ -121,7 +121,7 @@ class MANGOS_DLL_SPEC WorldSession
 {
     friend class CharacterHandler;
     public:
-        WorldSession(uint32 id, WorldSocket *sock, AccountTypes sec, time_t mute_time, LocaleConstant locale);
+        WorldSession(uint32 id, WorldSocket *sock, AccountTypes sec, uint32 premium, time_t mute_time, LocaleConstant locale);
         ~WorldSession();
 
         bool PlayerLoading() const { return m_playerLoading; }
@@ -140,6 +140,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendQueryTimeResponse();
 
         AccountTypes GetSecurity() const { return _security; }
+        uint32 GetPremium() const { return _premium; }
         uint32 GetAccountId() const { return _accountId; }
         Player* GetPlayer() const { return _player; }
         char const* GetPlayerName() const;
@@ -659,6 +660,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         AccountTypes _security;
         uint32 _accountId;
+        uint32 _premium;
 
         time_t _logoutTime;
         bool m_inQueue;                                     // session wait in auth.queue
