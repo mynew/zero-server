@@ -717,6 +717,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "selectqueue",    SEC_PLAYER,         true,  &ChatHandler::HandleAutoQueueMapCommand,        "", NULL },
         { "getrank",        SEC_PLAYER,         true,  &ChatHandler::HandleCoinsCommand,               "", NULL },
         { "togglebuy",      SEC_PLAYER,         true,  &ChatHandler::HandleToggleBuyCommand,           "", NULL },
+        { "getpremium",     SEC_PLAYER,         true,  &ChatHandler::HandleGetPremiumCommand,          "", NULL },
         { "quit",           SEC_CONSOLE,        true,  &ChatHandler::HandleQuitCommand,                "", NULL },
 
         { NULL,             0,                  false, NULL,                                           "", NULL }
