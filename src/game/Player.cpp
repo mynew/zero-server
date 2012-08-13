@@ -6075,7 +6075,16 @@ bool Player::RewardHonor(Unit *uVictim,uint32 groupsize)
     if (uVictim->GetAura(2479, EFFECT_INDEX_0))             // Honorless Target
         return false;
 
-    if (uVictim->GetTypeId() == TYPEID_UNIT)
+    if( uVictim->GetTypeId() == TYPEID_PLAYER )
+    {
+        Player *pVictim = ToPlayer();
+        
+        AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize)+1,HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
+        if (GetSession()->GetPremium() == 1 || GetSession()->GetPremium() == 3)
+            AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize)+1,HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
+        return true;
+    }
+    else if (uVictim->GetTypeId() == TYPEID_UNIT)
     {
         Creature *cVictim = (Creature *)uVictim;
         if (cVictim->IsCivilian())
@@ -6088,18 +6097,6 @@ bool Player::RewardHonor(Unit *uVictim,uint32 groupsize)
         {
             // maybe uncorrect honor value but no source to get it actually
             AddHonorCP(398.0,HONORABLE,cVictim->GetEntry(),TYPEID_UNIT);
-            return true;
-        }
-    }
-    else if( uVictim->GetTypeId() == TYPEID_PLAYER )
-    {
-        Player *pVictim = (Player *)uVictim;
-
-        if( getLevel() < (pVictim->getLevel()+5) )
-        {
-            AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
-            if (GetSession()->GetPremium() == 1 || GetSession()->GetPremium() == 3)
-                AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
             return true;
         }
     }
@@ -19328,7 +19325,23 @@ void Player::HandlePvPKill()
                     continue;
                 if (damagePct > 1)
                     damagePct = 1.0f;
-                float attackerReward = (rewardcoins * damagePct)*killstreakMod;
+
+                float rankdiffmod;
+                if (KalimdorRank > pAttacker->KalimdorRank)
+                {
+                    rankdiffmod = KalimdorRank - pAttacker->KalimdorRank;
+                    rankdiffmod = (rankdiffmod/10)+1.0f;
+                    if (rankdiffmod > 1.4f || rankdiffmod < 1.0f)
+                        rankdiffmod = 1.0f;
+                }
+                else
+                    rankdiffmod = 1;
+
+                float rankmod = ((pAttacker->KalimdorRank)/10)+0.8f;
+                if (rankmod > 1.4f || rankmod < 1.0f)
+                    rankmod = 1.0f;
+
+                float attackerReward = rewardcoins*damagePct*killstreakMod*rankmod*rankdiffmod;
 
                 if (pAttacker->GetSession()->GetPremium() == 2 || pAttacker->GetSession()->GetPremium() == 3)
                 {
@@ -19395,9 +19408,11 @@ void Player::HandlePvPKill()
     if (pMostDamager)
     {
         if (pMostDamager->GetGroup())
-            pMostDamager->GetGroup()->RewardGroupAtKill(this->ToUnit(), pMostDamager);
+            pMostDamager->GetGroup()->RewardGroupAtKill(this, pMostDamager);
         else
-            pMostDamager->RewardSinglePlayerAtKill(this->ToUnit());
+            pMostDamager->RewardSinglePlayerAtKill(this);
+
+        ChatHandler(pMostDamager).PSendSysMessage("%s[PvP System]%s Your most damage to %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetNameLink().c_str(),MSG_COLOR_WHITE);
         ChatHandler(this).PSendSysMessage("%s[PvP System]%s Your main attacker was %s%s who did %u damage to you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE,maxdamagerDmg);
     }
 
