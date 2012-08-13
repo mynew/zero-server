@@ -19327,9 +19327,9 @@ void Player::HandlePvPKill()
                     damagePct = 1.0f;
 
                 float rankdiffmod;
-                if (KalimdorRank < pAttacker->KalimdorRank)
+                if (KalimdorRank > pAttacker->KalimdorRank)
                 {
-                    rankdiffmod = KalimdorRank - pAttacker->KalimdorRank;
+                    rankdiffmod = pAttacker->KalimdorRank - KalimdorRank;
                     rankdiffmod = (rankdiffmod/10)+1.0f;
                 }
                 else
