@@ -6064,38 +6064,27 @@ uint32 Player::CalculateTotalKills(Unit *Victim,uint32 fromDate,uint32 toDate) c
 //How much honor Player gains/loses killing uVictim
 bool Player::RewardHonor(Unit *uVictim,uint32 groupsize)
 {
-    ChatHandler(this).PSendSysMessage("Going to add honor, might not work");
     float honor_points = 0;
     int kill_type = 0;
 
     DETAIL_LOG("PLAYER: RewardHonor");
 
     if (!uVictim)
-    {
-        ChatHandler(this).PSendSysMessage("Could not find victim");
         return false;
-    }
 
     if (uVictim->GetAura(2479, EFFECT_INDEX_0))             // Honorless Target
-    {
-        ChatHandler(this).PSendSysMessage("Honorless aura on victim");
         return false;
-    }
 
     if( uVictim->GetTypeId() == TYPEID_PLAYER )
     {
         Player *pVictim = ToPlayer();
         
-        ChatHandler(this).PSendSysMessage("Adding HK now");
         AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize)+1,HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
         if (GetSession()->GetPremium() == 1 || GetSession()->GetPremium() == 3)
             AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize)+1,HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
         return true;
     }
-    else
-        ChatHandler(this).PSendSysMessage("Victim was no player");
-
-    if (uVictim->GetTypeId() == TYPEID_UNIT)
+    else if (uVictim->GetTypeId() == TYPEID_UNIT)
     {
         Creature *cVictim = (Creature *)uVictim;
         if (cVictim->IsCivilian())
@@ -6119,10 +6108,7 @@ bool Player::AddHonorCP(float honor,uint8 type,uint32 victim,uint8 victimType)
 {
 
     if (!honor)
-    {
-        ChatHandler(this).PSendSysMessage("No fucking honor added, if you see this message and report it to LilleCarl he will know why this retarded system doesnt work.");
         return false;
-    }
 
     // CharacterDatabase.PExecute("INSERT INTO `character_honor_cp` (`guid`,`victim`,`victim_type`,`honor`,`date`,`type`) VALUES (%u, %u, %u, %f, %u, %u)", (uint32)GetGUIDLow(), (uint32)uVictim->GetEntry(),uVictim->GetType() (float)honor_points, (uint32)today, (uint8)kill_type);
 
@@ -6143,10 +6129,6 @@ bool Player::AddHonorCP(float honor,uint8 type,uint32 victim,uint8 victimType)
 
     CP.state  =  HK_NEW;
     CP.isKill =  isKill(victimType);
-    if (CP.isKill)
-        ChatHandler(this).PSendSysMessage("Was a kill");
-    else
-        ChatHandler(this).PSendSysMessage("Was not a kill");
 
     m_honorCP.push_back(CP);
 

@@ -1143,7 +1143,7 @@ void BattleGround::UpdatePlayerScore(Player *Source, uint32 type, uint32 value)
             break;
         case SCORE_BONUS_HONOR:                             // Honor bonus
             // reward honor instantly
-            if (Source->AddHonorCP(value,HONORABLE,0,0))
+            if (Source->AddHonorCP(value+1,HONORABLE,0,0))
                 itr->second->BonusHonor += value;
             break;
         default:
