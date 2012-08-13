@@ -19336,8 +19336,10 @@ void Player::HandlePvPKill()
                     rankdiffmod = 1;
 
                 float rankmod = ((pAttacker->KalimdorRank-4)/10)+1.0f;
+                if (rankmod > 1.4f || rankmod < 0.0f)
+                    rankmod = 1.0f;
 
-                float attackerReward = rewardcoins*(damagePct*killstreakMod*rankmod*rankdiffmod);
+                float attackerReward = rewardcoins*damagePct*killstreakMod*rankmod*rankdiffmod;
 
                 if (pAttacker->GetSession()->GetPremium() == 2 || pAttacker->GetSession()->GetPremium() == 3)
                 {
