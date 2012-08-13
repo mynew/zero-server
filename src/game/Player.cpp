@@ -19335,7 +19335,7 @@ void Player::HandlePvPKill()
                         rankdiffmod = 1.0f;
                 }
 
-                float rankmod = ((pAttacker->KalimdorRank)/10)+0.6f;
+                float rankmod = (pAttacker->KalimdorRank/10)+0.6f;
                 if (rankmod > 2.4f || rankmod < 1.0f)
                     rankmod = 1.0f;
 
