@@ -6087,9 +6087,9 @@ bool Player::RewardHonor(Unit *uVictim,uint32 groupsize)
         Player *pVictim = ToPlayer();
         
         ChatHandler(this).PSendSysMessage("Adding HK now");
-        AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
+        AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize)+1,HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
         if (GetSession()->GetPremium() == 1 || GetSession()->GetPremium() == 3)
-            AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
+            AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize)+1,HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
         return true;
     }
     else
@@ -6119,7 +6119,10 @@ bool Player::AddHonorCP(float honor,uint8 type,uint32 victim,uint8 victimType)
 {
 
     if (!honor)
+    {
+        ChatHandler(this).PSendSysMessage("No fucking honor added, if you see this message and report it to LilleCarl he will know why this retarded system doesnt work.");
         return false;
+    }
 
     // CharacterDatabase.PExecute("INSERT INTO `character_honor_cp` (`guid`,`victim`,`victim_type`,`honor`,`date`,`type`) VALUES (%u, %u, %u, %f, %u, %u)", (uint32)GetGUIDLow(), (uint32)uVictim->GetEntry(),uVictim->GetType() (float)honor_points, (uint32)today, (uint8)kill_type);
 
@@ -19411,7 +19414,7 @@ void Player::HandlePvPKill()
         else
             pMostDamager->RewardSinglePlayerAtKill(this);
 
-        ChatHandler(pMostDamager).PSendSysMessage("%s[PvP System]%s Your most damage to %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE);
+        ChatHandler(pMostDamager).PSendSysMessage("%s[PvP System]%s Your most damage to %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetNameLink().c_str(),MSG_COLOR_WHITE);
         ChatHandler(this).PSendSysMessage("%s[PvP System]%s Your main attacker was %s%s who did %u damage to you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE,maxdamagerDmg);
     }
 
