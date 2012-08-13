@@ -6092,8 +6092,8 @@ bool Player::RewardHonor(Unit *uVictim,uint32 groupsize)
             AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
         return true;
     }
-    else if (ToPlayer())
-        ChatHandler(ToPlayer()).PSendSysMessage("Victim was no player");
+    else
+        ChatHandler(this).PSendSysMessage("Victim was no player");
 
     if (uVictim->GetTypeId() == TYPEID_UNIT)
     {
