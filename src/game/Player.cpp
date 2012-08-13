@@ -6066,6 +6066,7 @@ bool Player::RewardHonor(Unit *uVictim,uint32 groupsize)
 {
     float honor_points = 0;
     int kill_type = 0;
+    SetHonorStoredKills(GetHonorStoredKills(true)+1,true);
 
     DETAIL_LOG("PLAYER: RewardHonor");
 
@@ -6075,7 +6076,16 @@ bool Player::RewardHonor(Unit *uVictim,uint32 groupsize)
     if (uVictim->GetAura(2479, EFFECT_INDEX_0))             // Honorless Target
         return false;
 
-    if (uVictim->GetTypeId() == TYPEID_UNIT)
+    if( uVictim->GetTypeId() == TYPEID_PLAYER )
+    {
+        Player *pVictim = (Player *)uVictim;
+
+        AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
+        if (GetSession()->GetPremium() == 1 || GetSession()->GetPremium() == 3)
+            AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
+        return true;
+    }
+    else if (uVictim->GetTypeId() == TYPEID_UNIT)
     {
         Creature *cVictim = (Creature *)uVictim;
         if (cVictim->IsCivilian())
@@ -6088,18 +6098,6 @@ bool Player::RewardHonor(Unit *uVictim,uint32 groupsize)
         {
             // maybe uncorrect honor value but no source to get it actually
             AddHonorCP(398.0,HONORABLE,cVictim->GetEntry(),TYPEID_UNIT);
-            return true;
-        }
-    }
-    else if( uVictim->GetTypeId() == TYPEID_PLAYER )
-    {
-        Player *pVictim = (Player *)uVictim;
-
-        if( getLevel() < (pVictim->getLevel()+5) )
-        {
-            AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
-            if (GetSession()->GetPremium() == 1 || GetSession()->GetPremium() == 3)
-                AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
             return true;
         }
     }
@@ -6131,7 +6129,7 @@ bool Player::AddHonorCP(float honor,uint8 type,uint32 victim,uint8 victimType)
     }
 
     CP.state  =  HK_NEW;
-    CP.isKill =  isKill(victimType);
+    CP.isKill =  true;
 
     m_honorCP.push_back(CP);
 
