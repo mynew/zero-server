@@ -28,6 +28,7 @@
 #include "WorldPacket.h"
 #include "Language.h"
 #include "MapManager.h"
+#include "Chat.h"
 
 BattleGroundWS::BattleGroundWS()
 {
