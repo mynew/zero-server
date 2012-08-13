@@ -6064,6 +6064,7 @@ uint32 Player::CalculateTotalKills(Unit *Victim,uint32 fromDate,uint32 toDate) c
 //How much honor Player gains/loses killing uVictim
 bool Player::RewardHonor(Unit *uVictim,uint32 groupsize)
 {
+    ChatHandler(this).PSendSysMessage("Going to add honor, might not work");
     float honor_points = 0;
     int kill_type = 0;
 
@@ -6084,7 +6085,8 @@ bool Player::RewardHonor(Unit *uVictim,uint32 groupsize)
     if( uVictim->GetTypeId() == TYPEID_PLAYER )
     {
         Player *pVictim = ToPlayer();
-
+        
+        ChatHandler(this).PSendSysMessage("Adding HK now");
         AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
         if (GetSession()->GetPremium() == 1 || GetSession()->GetPremium() == 3)
             AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
@@ -19405,9 +19407,11 @@ void Player::HandlePvPKill()
     if (pMostDamager)
     {
         if (pMostDamager->GetGroup())
-            pMostDamager->GetGroup()->RewardGroupAtKill(this->ToUnit(), pMostDamager);
+            pMostDamager->GetGroup()->RewardGroupAtKill(this, pMostDamager);
         else
-            pMostDamager->RewardSinglePlayerAtKill(this->ToUnit());
+            pMostDamager->RewardSinglePlayerAtKill(this);
+
+        ChatHandler(pMostDamager).PSendSysMessage("%s[PvP System]%s Your most damage to %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE);
         ChatHandler(this).PSendSysMessage("%s[PvP System]%s Your main attacker was %s%s who did %u damage to you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE,maxdamagerDmg);
     }
 
