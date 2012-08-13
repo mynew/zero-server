@@ -47,6 +47,13 @@ int32 GetSpellDuration(SpellEntry const *spellInfo)
 {
     if(!spellInfo)
         return 0;
+
+    if (spellInfo->Id == 12826 || spellInfo->Id == 12825 ||spellInfo->Id == 12824 ||spellInfo->Id == 118 || /*Poly*/
+        spellInfo->Id == 9853 || spellInfo->Id == 9852 || spellInfo->Id == 5196 || spellInfo->Id == 5695 || /*Roots*/
+        spellInfo->Id == 1062 || spellInfo->Id == 339 || spellInfo->Id == 11297 || spellInfo->Id == 2070 || /*Roots/Sap*/
+        spellInfo->Id == 6770 || spellInfo->Id == 6216 || spellInfo->Id == 6214 || spellInfo->Id == 5782)   /*Sap/Fear*/
+        return 12000; // Poly
+
     SpellDurationEntry const *du = sSpellDurationStore.LookupEntry(spellInfo->DurationIndex);
     if(!du)
         return 0;
@@ -57,6 +64,13 @@ int32 GetSpellMaxDuration(SpellEntry const *spellInfo)
 {
     if(!spellInfo)
         return 0;
+
+    if (spellInfo->Id == 12826 || spellInfo->Id == 12825 ||spellInfo->Id == 12824 ||spellInfo->Id == 118 || /*Poly*/
+        spellInfo->Id == 9853 || spellInfo->Id == 9852 || spellInfo->Id == 5196 || spellInfo->Id == 5695 || /*Roots*/
+        spellInfo->Id == 1062 || spellInfo->Id == 339 || spellInfo->Id == 11297 || spellInfo->Id == 2070 || /*Roots/Sap*/
+        spellInfo->Id == 6770 || spellInfo->Id == 6216 || spellInfo->Id == 6214 || spellInfo->Id == 5782)   /*Sap/Fear*/
+        return 12000; // Poly
+
     SpellDurationEntry const *du = sSpellDurationStore.LookupEntry(spellInfo->DurationIndex);
     if(!du)
         return 0;
