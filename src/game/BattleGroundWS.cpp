@@ -28,6 +28,7 @@
 #include "WorldPacket.h"
 #include "Language.h"
 #include "MapManager.h"
+#include "Chat.h"
 
 BattleGroundWS::BattleGroundWS()
 {
@@ -197,6 +198,9 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
         PlaySoundToAll(BG_WS_SOUND_FLAG_CAPTURED_HORDE);
         RewardReputationToTeam(889, m_ReputationCapture, HORDE);
     }
+
+    Source->KalimdorCoins += 10;
+    ChatHandler(Source).PSendSysMessage("10 KalimdorCoins rewarded for capturing the flag!");
     //for flag capture is reward distributed according level range
     RewardHonorToTeam(BG_WSG_FlagCapturedHonor[GetBracketId()], Source->GetTeam());
 
@@ -365,6 +369,8 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
             RespawnFlag(ALLIANCE, false);
             PlaySoundToAll(BG_WS_SOUND_FLAG_RETURNED);
             UpdatePlayerScore(Source, SCORE_FLAG_RETURNS, 1);
+            Source->KalimdorCoins += 5;
+            ChatHandler(Source).PSendSysMessage("5 KalimdorCoins rewarded for returning the flag!");
         }
         else
         {
@@ -393,6 +399,8 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
             RespawnFlag(HORDE, false);
             PlaySoundToAll(BG_WS_SOUND_FLAG_RETURNED);
             UpdatePlayerScore(Source, SCORE_FLAG_RETURNS, 1);
+            Source->KalimdorCoins += 5;
+            ChatHandler(Source).PSendSysMessage("5 KalimdorCoins rewarded for returning the flag!");
         }
         else
         {
