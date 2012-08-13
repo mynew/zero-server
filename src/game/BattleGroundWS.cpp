@@ -369,6 +369,8 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
             RespawnFlag(ALLIANCE, false);
             PlaySoundToAll(BG_WS_SOUND_FLAG_RETURNED);
             UpdatePlayerScore(Source, SCORE_FLAG_RETURNS, 1);
+            Source->KalimdorCoins += 5;
+            ChatHandler(Source).PSendSysMessage("5 KalimdorCoins rewarded for returning the flag!");
         }
         else
         {
@@ -397,6 +399,8 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
             RespawnFlag(HORDE, false);
             PlaySoundToAll(BG_WS_SOUND_FLAG_RETURNED);
             UpdatePlayerScore(Source, SCORE_FLAG_RETURNS, 1);
+            Source->KalimdorCoins += 5;
+            ChatHandler(Source).PSendSysMessage("5 KalimdorCoins rewarded for returning the flag!");
         }
         else
         {
@@ -413,9 +417,6 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
         //called in HandleGameObjectUseOpcode:
         //target_obj->Delete();
     }
-
-    Source->KalimdorCoins += 5;
-    ChatHandler(Source).PSendSysMessage("5 KalimdorCoins rewarded for capturing the flag!");
 
     if (!message_id)
         return;
