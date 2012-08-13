@@ -19326,10 +19326,11 @@ void Player::HandlePvPKill()
                 if (damagePct > 1)
                     damagePct = 1.0f;
                 float rankdiffmod = KalimdorRank - pAttacker->KalimdorRank;
-                if (rankdiffmod < 0)
+                
+                rankdiffmod = (rankdiffmod/10)+1.0f;
+
+                if (rankdiffmod > 2.4f || rankdiffmod < 1.0f)
                     rankdiffmod = 1;
-                else
-                    rankdiffmod = (rankdiffmod/10)+1.0f;
 
                 float rankmod = (pAttacker->KalimdorRank/10)+1.0f;
                 float attackerReward = rewardcoins*(damagePct*killstreakMod*rankmod*rankdiffmod);
