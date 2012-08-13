@@ -1138,23 +1138,6 @@ void Player::Update( uint32 update_diff, uint32 p_time )
         KalimdorRank = newrank;
         TenSTimer = 0;
 
-        if (GetAreaId() == 1741)
-        {
-            AddAura(5579);
-            AddAura(23273);
-            AddAura(23274);
-            AddAura(23276);
-            AddAura(23277);
-            /*
-            http://db.valkyrie-wow.com/?spell=5579
-            http://db.valkyrie-wow.com/?spell=5579
-            http://db.valkyrie-wow.com/?spell=23273
-            http://db.valkyrie-wow.com/?spell=23273
-            http://db.valkyrie-wow.com/?spell=23274
-            http://db.valkyrie-wow.com/?spell=23276
-            http://db.valkyrie-wow.com/?spell=23277*/
-        }
-
         if (AutoQueue)
             HandleBGQueue(GetObjectGuid(),QueueMapID);
     }
