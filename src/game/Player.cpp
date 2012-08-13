@@ -6066,26 +6066,34 @@ bool Player::RewardHonor(Unit *uVictim,uint32 groupsize)
 {
     float honor_points = 0;
     int kill_type = 0;
-    SetHonorStoredKills(GetHonorStoredKills(true)+1,true);
 
     DETAIL_LOG("PLAYER: RewardHonor");
 
     if (!uVictim)
+    {
+        ChatHandler(this).PSendSysMessage("Could not find victim");
         return false;
+    }
 
     if (uVictim->GetAura(2479, EFFECT_INDEX_0))             // Honorless Target
+    {
+        ChatHandler(this).PSendSysMessage("Honorless aura on victim");
         return false;
+    }
 
     if( uVictim->GetTypeId() == TYPEID_PLAYER )
     {
-        Player *pVictim = (Player *)uVictim;
+        Player *pVictim = ToPlayer();
 
         AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
         if (GetSession()->GetPremium() == 1 || GetSession()->GetPremium() == 3)
             AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
         return true;
     }
-    else if (uVictim->GetTypeId() == TYPEID_UNIT)
+    else if (ToPlayer())
+        ChatHandler(ToPlayer()).PSendSysMessage("Victim was no player");
+
+    if (uVictim->GetTypeId() == TYPEID_UNIT)
     {
         Creature *cVictim = (Creature *)uVictim;
         if (cVictim->IsCivilian())
@@ -6129,7 +6137,11 @@ bool Player::AddHonorCP(float honor,uint8 type,uint32 victim,uint8 victimType)
     }
 
     CP.state  =  HK_NEW;
-    CP.isKill =  true;
+    CP.isKill =  isKill(victimType);
+    if (CP.isKill)
+        ChatHandler(this).PSendSysMessage("Was a kill");
+    else
+        ChatHandler(this).PSendSysMessage("Was not a kill");
 
     m_honorCP.push_back(CP);
 
