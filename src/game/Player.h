@@ -875,6 +875,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         std::map<uint64, DamageHealData*> m_DamagersAndHealers;
         void DamagedOrHealed(uint64 guid, uint32 damage, uint32 heal);
         void HandleBGQueue(ObjectGuid guid, uint32 mapId);
+        void GivePremium(uint32 time, uint32 type);
         Unit* ToUnit(){ return reinterpret_cast<Unit*>(this); }
 
         bool AddAura(uint32 spellID);

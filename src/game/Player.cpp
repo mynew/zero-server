@@ -19595,3 +19595,8 @@ void Player::HandleBGQueue(ObjectGuid guid, uint32 mapId)
     sBattleGroundMgr.ScheduleQueueUpdate(bgQueueTypeId, bgTypeId, GetBattleGroundBracketIdFromLevel(bgTypeId));
     ChatHandler(this).PSendSysMessage("You was autoadded to bg queue, disable autoqueueing with command .queue");
 }
+
+void Player::GivePremium(uint32 time, uint32 type)
+{
+    LoginDatabase.PExecute("INSERT INTO account_premium (id,setdate,unsetdatedate,premium,active) VALUES (%u,UNIX_TIMESTAMP(),UNIX_TIMESTAMP()+%u,%u,1)",GetSession()->GetAccountId(),time,type);
+}
