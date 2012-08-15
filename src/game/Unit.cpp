@@ -522,42 +522,44 @@ void Unit::DealDamageMods(Unit *pVictim, uint32 &damage, uint32* absorb)
 
 uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const *spellProto, bool durabilityLoss)
 {
+    if(!IsInWorld() || !pVictim->IsInWorld())
+        return damage;
+
     bool isInGuru = false;
     if (GetMapId() == 0 && GetZoneId() == 33 && (GetAreaId() == 1741 || GetAreaId() == 2177) && pVictim->GetTypeId() == TYPEID_PLAYER)
         isInGuru = true;
 
     Player * pAttacker = GetCharmerOrOwnerPlayerOrPlayerItself();
-    if (!pAttacker)
-        pAttacker = ToPlayer();
-
-    if (pVictim->ToPlayer() && pAttacker && this != pVictim)
+    if (pVictim->ToPlayer() && pAttacker && pAttacker->GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER && pAttacker->IsInWorld() && pVictim->IsInWorld())
     {
-        uint32 groupsize = 0;
-        Player* pPlayer = ToPlayer();
-        if (isInGuru && pPlayer && pPlayer->GetGroup())
+        if (pVictim->ToPlayer() && pAttacker && this != pVictim)
         {
-            for(GroupReference *itr = pPlayer->GetGroup()->GetFirstMember(); itr != NULL; itr = itr->next())
-                groupsize ++;
-
-            if (groupsize > 2)
+            uint32 groupsize = 0;
+            if (isInGuru && pAttacker && pAttacker->GetGroup())
             {
-                pPlayer->GetGroup()->RemoveMember(pPlayer->GetObjectGuid(),1);
-                ChatHandler(pPlayer).PSendSysMessage("You was removed from the group, we do not allow groups bigger then 2 in Gurubashi Arena.");
+                for(GroupReference *itr = pAttacker->GetGroup()->GetFirstMember(); itr != NULL; itr = itr->next())
+                    groupsize ++;
+
+                if (groupsize > 2)
+                {
+                    pAttacker->GetGroup()->RemoveMember(pAttacker->GetObjectGuid(),1);
+                    ChatHandler(pAttacker).PSendSysMessage("You was removed from the group, we do not allow groups bigger then 2 in Gurubashi Arena.");
+                }
             }
-        }
 
 
-        pVictim->ToPlayer()->DamagedOrHealed(pAttacker->GetObjectGuid(), damage, 0);
+            pVictim->ToPlayer()->DamagedOrHealed(pAttacker->GetObjectGuid(), damage, 0);
 
-        if ((pVictim->GetAreaId() == 2177 && GetAreaId() == 1741) && pVictim->GetMapId() == GetMapId() && !HasAura(13874))
-        {
-            CastSpell(this,25686,true);
-            ChatHandler(this->ToPlayer()).PSendSysMessage("There will be no camping here!");
-        }
-        else if (GetPositionZ() > 30 && pVictim->GetAreaId() == 1741)
-        {
-            CastSpell(this,25686,true);
-            ChatHandler(this->ToPlayer()).PSendSysMessage("There will be no camping here!");
+            if (pVictim->GetAreaId() == 2177 && pAttacker->GetAreaId() == 1741 && !HasAura(13874))
+            {
+                CastSpell(this,25686,true);
+                ChatHandler(pAttacker).PSendSysMessage("There will be no camping here!");
+            }
+            else if (GetPositionZ() > 30 && pVictim->GetAreaId() == 2177)
+            {
+                CastSpell(this,25686,true);
+                ChatHandler(pAttacker).PSendSysMessage("There will be no camping here!");
+            }
         }
     }
 
