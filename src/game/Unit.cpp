@@ -532,16 +532,15 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         if (pVictim->ToPlayer() && pAttacker && this != pVictim)
         {
             uint32 groupsize = 0;
-            Player* pPlayer = ToPlayer();
-            if (isInGuru && pPlayer && pPlayer->GetGroup())
+            if (isInGuru && pAttacker && pAttacker->GetGroup())
             {
-                for(GroupReference *itr = pPlayer->GetGroup()->GetFirstMember(); itr != NULL; itr = itr->next())
+                for(GroupReference *itr = pAttacker->GetGroup()->GetFirstMember(); itr != NULL; itr = itr->next())
                     groupsize ++;
 
                 if (groupsize > 2)
                 {
-                    pPlayer->GetGroup()->RemoveMember(pPlayer->GetObjectGuid(),1);
-                    ChatHandler(pPlayer).PSendSysMessage("You was removed from the group, we do not allow groups bigger then 2 in Gurubashi Arena.");
+                    pAttacker->GetGroup()->RemoveMember(pAttacker->GetObjectGuid(),1);
+                    ChatHandler(pAttacker).PSendSysMessage("You was removed from the group, we do not allow groups bigger then 2 in Gurubashi Arena.");
                 }
             }
 
