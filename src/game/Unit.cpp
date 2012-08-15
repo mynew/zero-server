@@ -522,12 +522,15 @@ void Unit::DealDamageMods(Unit *pVictim, uint32 &damage, uint32* absorb)
 
 uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const *spellProto, bool durabilityLoss)
 {
+    if(!IsInWorld() || !pVictim->IsInWorld())
+        return damage;
+
     bool isInGuru = false;
     if (GetMapId() == 0 && GetZoneId() == 33 && (GetAreaId() == 1741 || GetAreaId() == 2177) && pVictim->GetTypeId() == TYPEID_PLAYER)
         isInGuru = true;
 
     Player * pAttacker = GetCharmerOrOwnerPlayerOrPlayerItself();
-    if (pAttacker && pAttacker->GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER && pAttacker->IsInWorld() && pVictim->IsInWorld())
+    if (pVictim->ToPlayer() && pAttacker && pAttacker->GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER && pAttacker->IsInWorld() && pVictim->IsInWorld())
     {
         if (pVictim->ToPlayer() && pAttacker && this != pVictim)
         {
@@ -550,12 +553,12 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             if ((pVictim->GetAreaId() == 2177 && GetAreaId() == 1741) && pVictim->GetMapId() == GetMapId() && !HasAura(13874))
             {
                 CastSpell(this,25686,true);
-                ChatHandler(this->ToPlayer()).PSendSysMessage("There will be no camping here!");
+                ChatHandler(pAttacker).PSendSysMessage("There will be no camping here!");
             }
             else if (GetPositionZ() > 30 && pVictim->GetAreaId() == 1741)
             {
                 CastSpell(this,25686,true);
-                ChatHandler(this->ToPlayer()).PSendSysMessage("There will be no camping here!");
+                ChatHandler(pAttacker).PSendSysMessage("There will be no camping here!");
             }
         }
     }
