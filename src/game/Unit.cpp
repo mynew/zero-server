@@ -550,12 +550,12 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
             pVictim->ToPlayer()->DamagedOrHealed(pAttacker->GetObjectGuid(), damage, 0);
 
-            if ((pVictim->GetAreaId() == 2177 && GetAreaId() == 1741) && pVictim->GetMapId() == GetMapId() && !HasAura(13874))
+            if (pVictim->GetAreaId() == 2177 && pAttacker->GetAreaId() == 1741 && !HasAura(13874))
             {
                 CastSpell(this,25686,true);
                 ChatHandler(pAttacker).PSendSysMessage("There will be no camping here!");
             }
-            else if (GetPositionZ() > 30 && pVictim->GetAreaId() == 1741)
+            else if (GetPositionZ() > 30 && pVictim->GetAreaId() == 2177)
             {
                 CastSpell(this,25686,true);
                 ChatHandler(pAttacker).PSendSysMessage("There will be no camping here!");
