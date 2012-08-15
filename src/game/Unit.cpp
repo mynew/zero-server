@@ -527,7 +527,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         isInGuru = true;
 
     Player * pAttacker = GetCharmerOrOwnerPlayerOrPlayerItself();
-    if (pAttacker)
+    if (pAttacker && pAttacker->GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER && pAttacker->IsInWorld() && pVictim->IsInWorld())
     {
         if (pVictim->ToPlayer() && pAttacker && this != pVictim)
         {
