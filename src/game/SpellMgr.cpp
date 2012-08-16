@@ -49,7 +49,8 @@ bool IsSpellOpVanillaCC(SpellEntry const *spellInfo)
         spellInfo->Id == 9853 || spellInfo->Id == 9852 || spellInfo->Id == 5196 || spellInfo->Id == 5695 || /*Roots*/
         spellInfo->Id == 1062 || spellInfo->Id == 339 || spellInfo->Id == 11297 || spellInfo->Id == 2070 || /*Roots/Sap*/
         spellInfo->Id == 6770 || spellInfo->Id == 6216 || spellInfo->Id == 6214 || spellInfo->Id == 5782 || /*Sap/Fear*/
-        spellInfo->Id == 3355 || spellInfo->Id == 14308 || spellInfo->Id == 14309) // Freezing Trap
+        spellInfo->Id == 3355 || spellInfo->Id == 14308 || spellInfo->Id == 14309 || /*Freezing Trap*/
+        spellInfo->Id == 6358/*Seduction */)
         return true;
     else
         return false;
