@@ -6064,10 +6064,6 @@ uint32 Player::CalculateTotalKills(Unit *Victim,uint32 fromDate,uint32 toDate) c
 //How much honor Player gains/loses killing uVictim
 bool Player::RewardHonor(Unit *uVictim,uint32 groupsize)
 {
-    if (uVictim->ToPlayer())
-        if (GetSession()->GetRemoteAddress() == uVictim->ToPlayer()->GetSession()->GetRemoteAddress())
-            return false;
-
     float honor_points = 0;
     int kill_type = 0;
 
