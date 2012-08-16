@@ -51,6 +51,8 @@ bool IsSpellOpVanillaCC(SpellEntry const *spellInfo)
         spellInfo->Id == 6770 || spellInfo->Id == 6216 || spellInfo->Id == 6214 || spellInfo->Id == 5782 || /*Sap/Fear*/
         spellInfo->Id == 3355 || spellInfo->Id == 14308 || spellInfo->Id == 14309) // Freezing Trap
         return true;
+    else
+        return false;
 }
 
 int32 GetSpellDuration(SpellEntry const *spellInfo)
