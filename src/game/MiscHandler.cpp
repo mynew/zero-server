@@ -50,6 +50,12 @@ void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
 
     if(GetPlayer()->isAlive() || GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;
+    if (!GetPlayer())
+        return;
+    if (!GetPlayer()->IsInWorld())
+        return;
+    if (GetPlayer()->GetAreaId() == 2177 || GetPlayer()->GetAreaId() == 1741)
+        return;
 
     // the world update order is sessions, players, creatures
     // the netcode runs in parallel with all of these
