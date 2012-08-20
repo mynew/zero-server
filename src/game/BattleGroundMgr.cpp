@@ -1264,6 +1264,20 @@ void BattleGroundMgr::SendToBattleGround(Player *pl, uint32 instanceId, BattleGr
     BattleGround *bg = GetBattleGround(instanceId, bgTypeId);
     if (bg)
     {
+        if (!pl->GetGroup())
+        {
+            if (bg->GetPlayersCountByTeam(ALLIANCE) > bg->GetPlayersCountByTeam(HORDE))
+            {
+                pl->SetBGTeam(HORDE);
+                pl->setFaction(29); // orc, and generic for horde
+            }
+            else if (bg->GetPlayersCountByTeam(HORDE) > bg->GetPlayersCountByTeam(ALLIANCE))
+            {
+                pl->SetBGTeam(ALLIANCE);
+                pl->setFaction(55); // dwarf/gnome, and generic for alliance
+            }
+        }
+
         uint32 mapid = bg->GetMapId();
         float x, y, z, O;
         Team team = pl->GetBGTeam();
