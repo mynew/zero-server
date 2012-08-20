@@ -323,6 +323,10 @@ void BattleGround::Update(uint32 diff)
         }
     }
 
+    for(BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+        if (Player *plr = ObjectAccessor::FindPlayer(itr->first))
+            plr->SetFFAPvP(true);
+
     /*********************************************************/
     /***           BATTLEGROUND BALLANCE SYSTEM            ***/
     /*********************************************************/
