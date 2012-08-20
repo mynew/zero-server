@@ -323,6 +323,10 @@ void BattleGround::Update(uint32 diff)
         }
     }
 
+    for(BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+        if (Player *plr = ObjectAccessor::FindPlayer(itr->first))
+            plr->SetFFAPvP(true);
+
     /*********************************************************/
     /***           BATTLEGROUND BALLANCE SYSTEM            ***/
     /*********************************************************/
@@ -879,6 +883,9 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
     }
 
     Player *plr = sObjectMgr.GetPlayer(guid);
+
+    if (plr)
+        plr->setFaction(plr->getFactionForRace(plr->getRace()));
 
     // should remove spirit of redemption
     if (plr && plr->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
