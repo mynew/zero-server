@@ -19340,6 +19340,8 @@ void Player::HandlePvPKill()
                     rankmod = 1.0f;
 
                 float attackerReward = rewardcoins*damagePct*killstreakMod*rankmod*rankdiffmod;
+                if (attackerReward > rewardcoins*4)
+                    attackerReward = rewardcoins*4;
 
                 if (pAttacker->GetSession()->GetPremium() == 2 || pAttacker->GetSession()->GetPremium() == 3)
                 {
@@ -19382,6 +19384,8 @@ void Player::HandlePvPKill()
                         if (healingPct > 1)
                             healingPct = 1.0f;
                         float healerReward = ((attackerReward * healingPct)*maxhealingPct)*killstreakMod;
+                        if (healerReward > rewardcoins*4)
+                            healerReward = rewardcoins*4;
 
                         if (pHealer->GetSession()->GetPremium() == 2 || pHealer->GetSession()->GetPremium() == 3)
                         {
