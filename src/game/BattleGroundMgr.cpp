@@ -566,29 +566,39 @@ bool BattleGroundQueue::CheckPremadeMatch(BattleGroundBracketId bracket_id, uint
 bool BattleGroundQueue::CheckNormalMatch(BattleGroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers)
 {
     GroupsQueueType::const_iterator itr_team[BG_TEAMS_COUNT];
-    for(uint32 i = 0; i < BG_TEAMS_COUNT; i++)
+    for (uint8 i = 0; i < BG_TEAMS_COUNT; ++i)
     {
         itr_team[i] = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE + i].begin();
-        for(; itr_team[i] != m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE + i].end(); ++(itr_team[i]))
+        for (; itr_team[i] != m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE + i].end(); ++(itr_team[i]))
         {
             if (!(*(itr_team[i]))->IsInvitedToBGInstanceGUID)
             {
                 m_SelectionPools[i].AddGroup(*(itr_team[i]), maxPlayers);
-                if (m_SelectionPools[i].GetPlayerCount() >= minPlayers)
+                if (m_SelectionPools[i].GetPlayerCount() >= minPlayers * 2)
                     break;
             }
         }
     }
-    //try to invite same number of players - this cycle may cause longer wait time even if there are enough players in queue, but we want ballanced bg
+
+    // allow 1v0 if debug bg
+    if (sBattleGroundMgr.isTesting()&& 
+        (m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() || m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount()))
+        return true;
+
+    // If there are enough players to fill 2 teams with minplayerperteam count.
+    if (m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() + m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount() >= minPlayers * 2)
+        return true;
+
+    // try to invite same number of players - this cycle may cause longer wait time even if there are enough players in queue, but we want ballanced bg
     uint32 j = BG_TEAM_ALLIANCE;
     if (m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount() < m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount())
         j = BG_TEAM_HORDE;
-    if( sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_INVITATION_TYPE) != 0
-        && m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount() >= minPlayers && m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() >= minPlayers )
+    if (sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_INVITATION_TYPE) != 0 &&
+        m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount() >= minPlayers && m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() >= minPlayers)
     {
-        //we will try to invite more groups to team with less players indexed by j
-        ++(itr_team[j]);                                         //this will not cause a crash, because for cycle above reached break;
-        for(; itr_team[j] != m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE + j].end(); ++(itr_team[j]))
+        // we will try to invite more groups to team with less players indexed by j
+        ++(itr_team[j]);                                    // this will not cause a crash, because for cycle above reached break;
+        for (; itr_team[j] != m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE + j].end(); ++(itr_team[j]))
         {
             if (!(*(itr_team[j]))->IsInvitedToBGInstanceGUID)
                 if (!m_SelectionPools[j].AddGroup(*(itr_team[j]), m_SelectionPools[(j + 1) % BG_TEAMS_COUNT].GetPlayerCount()))
@@ -598,10 +608,8 @@ bool BattleGroundQueue::CheckNormalMatch(BattleGroundBracketId bracket_id, uint3
         if (abs((int32)(m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount() - m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount())) > 2)
             return false;
     }
-    //allow 1v0 if debug bg
-    if (sBattleGroundMgr.isTesting() && (m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() || m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount()))
-        return true;
-    //return true if there are enough players in selection pools - enable to work .debug bg command correctly
+
+    // return true if there are enough players in selection pools - enable to work .debug bg command correctly
     return m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() >= minPlayers && m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount() >= minPlayers;
 }
 
@@ -1259,16 +1267,49 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, ObjectGuid 
     }
 }
 
-void BattleGroundMgr::SendToBattleGround(Player *pl, uint32 instanceId, BattleGroundTypeId bgTypeId)
+void BattleGroundMgr::SendToBattleGround(Player* pl, uint32 instanceId, BattleGroundTypeId bgTypeId)
 {
-    BattleGround *bg = GetBattleGround(instanceId, bgTypeId);
+    BattleGround* bg = GetBattleGround(instanceId, bgTypeId);
     if (bg)
     {
+        {
+            Team GrpTeam = TEAM_NONE;
+            if (Group *pGroup = pl->GetGroup())
+            {
+                for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+                {
+                    Player* pGroupGuy = itr->getSource();
+                    if (!pGroupGuy)
+                        continue;
+
+                    if (pGroupGuy->GetBattleGround() && pGroupGuy->GetBattleGround()->GetInstanceID() == instanceId && pGroupGuy->GetBattleGround()->GetTypeID() == bgTypeId)
+                    {
+                        GrpTeam = pGroupGuy->GetBGTeam();
+                        break;
+                    }
+                }
+            }
+            if (GrpTeam != TEAM_NONE && bg->GetPlayersCountByTeam(GrpTeam) < bg->GetMaxPlayersPerTeam())
+                pl->SetBGTeam(GrpTeam);
+            else
+            {
+                if (bg->GetPlayersCountByTeam(HORDE) < bg->GetMaxPlayersPerTeam() && bg->GetPlayersCountByTeam(HORDE) < bg->GetPlayersCountByTeam(ALLIANCE))
+                    pl->SetBGTeam(HORDE);
+                else if (bg->GetPlayersCountByTeam(ALLIANCE) < bg->GetMaxPlayersPerTeam() && bg->GetPlayersCountByTeam(ALLIANCE) < bg->GetPlayersCountByTeam(HORDE))
+                    pl->SetBGTeam(ALLIANCE);
+            }
+            if (pl->GetBGTeam() == HORDE)
+                pl->setFaction(29); // orc, and generic for horde
+            else if (pl->GetBGTeam() == ALLIANCE)
+                pl->setFaction(55); // dwarf/gnome, and generic for alliance
+        }
+
+        bg->UpdatePlayersCountByTeam(pl->GetBGTeam(), false); // Add here instead of in AddPlayer, because AddPlayer is not made until loading screen is finished. Which can cause unbalance in the system.
         uint32 mapid = bg->GetMapId();
         float x, y, z, O;
         Team team = pl->GetBGTeam();
-        if (team==0)
-            team = pl->GetTeam();
+        if (team == 0)
+            team = pl->GetBGTeam();
         bg->GetTeamStartLoc(team, x, y, z, O);
 
         DETAIL_LOG("BATTLEGROUND: Sending %s to map %u, X %f, Y %f, Z %f, O %f", pl->GetName(), mapid, x, y, z, O);
@@ -1276,7 +1317,7 @@ void BattleGroundMgr::SendToBattleGround(Player *pl, uint32 instanceId, BattleGr
     }
     else
     {
-        sLog.outError("player %u trying to port to nonexistent bg instance %u",pl->GetGUIDLow(), instanceId);
+        sLog.outError("player %u trying to port to nonexistent bg instance %u", pl->GetGUIDLow(), instanceId);
     }
 }
 
