@@ -33,6 +33,7 @@
 #define MSG_COLOR_MAGENTA      "|cffff00ff"
 #define MSG_COLOR_YELLOW       "|cffffff00"
 #define MSG_COLOR_CYAN         "|cff00ffff"
+#define MSG_COLOR_DARKBLUE     "|cff0000ff"
 
 #define MSG_COLOR_GREY         "|cff9d9d9d"
 #define MSG_COLOR_WHITE        "|cffffffff"
@@ -40,6 +41,16 @@
 #define MSG_COLOR_BLUE         "|cff0080ff"
 #define MSG_COLOR_PURPLE       "|cffb048f8"
 #define MSG_COLOR_ORANGE       "|cffff8000"
+
+#define MSG_COLOR_DRUID        "|cffff7d0a"
+#define MSG_COLOR_HUNTER       "|cffabd473"
+#define MSG_COLOR_MAGE         "|cff69ccf0"
+#define MSG_COLOR_PALADIN      "|cfff58cba"
+#define MSG_COLOR_PRIEST       "|cffffffff"
+#define MSG_COLOR_ROGUE        "|cfffff569"
+#define MSG_COLOR_SHAMAN       "|cff0070de"
+#define MSG_COLOR_WARLOCK      "|cff9482c9"
+#define MSG_COLOR_WARRIOR      "|cffc79c6e"
 
 struct AreaTrigger;
 struct AreaTriggerEntry;
@@ -112,6 +123,7 @@ class MANGOS_DLL_SPEC ChatHandler
 
         void SendSysMessage(          int32     entry);
         void PSendSysMessage(         const char *format, ...) ATTR_PRINTF(2,3);
+        void PSendGlobalSysMessage(         const char *format, ...) ATTR_PRINTF(2,3);
         void PSendSysMessage(         int32     entry, ...  );
 
         bool ParseCommands(const char* text);
@@ -119,6 +131,7 @@ class MANGOS_DLL_SPEC ChatHandler
 
         bool isValidChatMessage(const char* msg);
         bool HasSentErrorMessage() { return sentErrorMessage;}
+        std::string BuildWorldChatMsg(std::string msg);
     protected:
         explicit ChatHandler() : m_session(NULL) {}      // for CLI subclass
 
