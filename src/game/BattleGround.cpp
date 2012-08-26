@@ -498,7 +498,7 @@ void BattleGround::SendPacketToTeam(Team teamId, WorldPacket *packet, Player *se
             continue;
 
         Team team = itr->second.PlayerTeam;
-        if (!team) team = plr->GetTeam();
+        if (!team) team = plr->GetBGTeam();
 
         if (team == teamId)
             plr->GetSession()->SendPacket(packet);
@@ -529,7 +529,7 @@ void BattleGround::PlaySoundToTeam(uint32 SoundID, Team teamId)
         }
 
         Team team = itr->second.PlayerTeam;
-        if(!team) team = plr->GetTeam();
+        if(!team) team = plr->GetBGTeam();
 
         if (team == teamId)
         {
@@ -555,7 +555,7 @@ void BattleGround::CastSpellOnTeam(uint32 SpellID, Team teamId)
         }
 
         Team team = itr->second.PlayerTeam;
-        if(!team) team = plr->GetTeam();
+        if(!team) team = plr->GetBGTeam();
 
         if (team == teamId)
             plr->CastSpell(plr, SpellID, true);
@@ -578,7 +578,7 @@ void BattleGround::RewardHonorToTeam(uint32 Honor, Team teamId)
         }
 
         Team team = itr->second.PlayerTeam;
-        if(!team) team = plr->GetTeam();
+        if(!team) team = plr->GetBGTeam();
 
         if (team == teamId)
             UpdatePlayerScore(plr, SCORE_BONUS_HONOR, Honor);
@@ -606,7 +606,7 @@ void BattleGround::RewardReputationToTeam(uint32 faction_id, uint32 Reputation, 
         }
 
         Team team = itr->second.PlayerTeam;
-        if(!team) team = plr->GetTeam();
+        if(!team) team = plr->GetBGTeam();
 
         if (team == teamId)
             plr->GetReputationMgr().ModifyReputation(factionEntry, Reputation);
@@ -692,7 +692,7 @@ void BattleGround::EndBattleGround(Team winner)
         }
 
         //this line is obsolete - team is set ALWAYS
-        //if(!team) team = plr->GetTeam();
+        //if(!team) team = plr->GetBGTeam();
 
         if (team == winner)
         {
@@ -898,7 +898,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
         BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeID());
         if (plr)
         {
-            if (!team) team = plr->GetTeam();
+            if (!team) team = plr->GetBGTeam();
 
             if (SendPacket)
             {
@@ -1503,7 +1503,7 @@ void BattleGround::HandleKillPlayer( Player *player, Player *killer )
             if (!plr || plr == killer)
                 continue;
 
-            if (plr->GetTeam() == killer->GetTeam() && plr->IsAtGroupRewardDistance(player))
+            if (plr->GetBGTeam() == killer->GetBGTeam() && plr->IsAtGroupRewardDistance(player))
                 UpdatePlayerScore(plr, SCORE_HONORABLE_KILLS, 1);
         }
     }
@@ -1576,5 +1576,5 @@ void BattleGround::SetBgRaid(Team team, Group *bg_raid)
 
 WorldSafeLocsEntry const* BattleGround::GetClosestGraveYard( Player* player )
 {
-    return sObjectMgr.GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetTeam());
+    return sObjectMgr.GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetBGTeam());
 }

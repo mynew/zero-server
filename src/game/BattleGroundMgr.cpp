@@ -146,7 +146,7 @@ GroupQueueInfo * BattleGroundQueue::AddGroup(Player *leader, Group* grp, BattleG
     ginfo->IsInvitedToBGInstanceGUID = 0;
     ginfo->JoinTime                  = WorldTimer::getMSTime();
     ginfo->RemoveInviteTime          = 0;
-    ginfo->GroupTeam                 = leader->GetTeam();
+    ginfo->GroupTeam                 = leader->GetBGTeam();
 
     ginfo->Players.clear();
 
