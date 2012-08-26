@@ -1095,6 +1095,9 @@ void Player::Update( uint32 update_diff, uint32 p_time )
     if(!IsInWorld())
         return;
 
+    if (GetBattleGround())
+        SetFFAPvP(true);
+
     TenSTimer += update_diff;
     if (TenSTimer > 10000)
     {
