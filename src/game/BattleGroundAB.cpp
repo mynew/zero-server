@@ -189,13 +189,13 @@ void BattleGroundAB::HandleAreaTrigger(Player *Source, uint32 Trigger)
     switch(Trigger)
     {
         case 3948:                                          // Arathi Basin Alliance Exit.
-            if (Source->GetBGTeam() != ALLIANCE)
+            if (Source->GetTeam() != ALLIANCE)
                 Source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_ALLIANCE_USE);
             else
                 Source->LeaveBattleground();
             break;
         case 3949:                                          // Arathi Basin Horde Exit.
-            if (Source->GetBGTeam() != HORDE)
+            if (Source->GetTeam() != HORDE)
                 Source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_HORDE_USE);
             else
                 Source->LeaveBattleground();
@@ -334,7 +334,7 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target
         return;
     BG_AB_Nodes node = BG_AB_Nodes(event);
 
-    BattleGroundTeamIndex teamIndex = GetTeamIndexByTeamId(source->GetBGTeam());
+    BattleGroundTeamIndex teamIndex = GetTeamIndexByTeamId(source->GetTeam());
 
     // Check if player really could use this banner, not cheated
     if (!(m_Nodes[node] == 0 || teamIndex == m_Nodes[node] % 2))
@@ -490,7 +490,7 @@ void BattleGroundAB::EndBattleGround(Team winner)
 
 WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(Player* player)
 {
-    BattleGroundTeamIndex teamIndex = GetTeamIndexByTeamId(player->GetBGTeam());
+    BattleGroundTeamIndex teamIndex = GetTeamIndexByTeamId(player->GetTeam());
 
     // Is there any occupied node for this team?
     std::vector<uint8> nodes;

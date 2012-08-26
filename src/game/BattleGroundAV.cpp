@@ -45,7 +45,7 @@ void BattleGroundAV::HandleKillPlayer(Player *player, Player *killer)
         return;
 
     BattleGround::HandleKillPlayer(player, killer);
-    UpdateScore(GetTeamIndexByTeamId(player->GetBGTeam()), -1);
+    UpdateScore(GetTeamIndexByTeamId(player->GetTeam()), -1);
 }
 
 void BattleGroundAV::HandleKillUnit(Creature *creature, Player *killer)
@@ -91,10 +91,10 @@ void BattleGroundAV::HandleKillUnit(Creature *creature, Player *killer)
             SpawnEvent(BG_AV_NodeEventCaptainDead_H, 0, true);
             break;
         case BG_AV_MINE_BOSSES_NORTH:
-            ChangeMineOwner(BG_AV_NORTH_MINE, GetAVTeamIndexByTeamId(killer->GetBGTeam()));
+            ChangeMineOwner(BG_AV_NORTH_MINE, GetAVTeamIndexByTeamId(killer->GetTeam()));
             break;
         case BG_AV_MINE_BOSSES_SOUTH:
-            ChangeMineOwner(BG_AV_SOUTH_MINE, GetAVTeamIndexByTeamId(killer->GetBGTeam()));
+            ChangeMineOwner(BG_AV_SOUTH_MINE, GetAVTeamIndexByTeamId(killer->GetTeam()));
             break;
     }
 }
@@ -103,7 +103,7 @@ void BattleGroundAV::HandleQuestComplete(uint32 questid, Player *player)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
-    BattleGroundAVTeamIndex teamIdx = GetAVTeamIndexByTeamId(player->GetBGTeam());
+    BattleGroundAVTeamIndex teamIdx = GetAVTeamIndexByTeamId(player->GetTeam());
     MANGOS_ASSERT(teamIdx != BG_AV_TEAM_NEUTRAL);
 
     uint32 reputation = 0;                                  // reputation for the whole team (other reputation must be done in db)
@@ -207,7 +207,7 @@ void BattleGroundAV::HandleQuestComplete(uint32 questid, Player *player)
             break;
     }
     if (reputation)
-        RewardReputationToTeam((player->GetBGTeam() == ALLIANCE) ? BG_AV_FACTION_A : BG_AV_FACTION_H, reputation, player->GetBGTeam());
+        RewardReputationToTeam((player->GetTeam() == ALLIANCE) ? BG_AV_FACTION_A : BG_AV_FACTION_H, reputation, player->GetTeam());
 }
 
 void BattleGroundAV::UpdateScore(BattleGroundTeamIndex teamIdx, int32 points )
@@ -360,13 +360,13 @@ void BattleGroundAV::HandleAreaTrigger(Player *Source, uint32 Trigger)
     {
         case 95:
         case 2608:
-            if (Source->GetBGTeam() != ALLIANCE)
+            if (Source->GetTeam() != ALLIANCE)
                 Source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_ALLIANCE_USE);
             else
                 Source->LeaveBattleground();
             break;
         case 2606:
-            if (Source->GetBGTeam() != HORDE)
+            if (Source->GetTeam() != HORDE)
                 Source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_HORDE_USE);
             else
                 Source->LeaveBattleground();
@@ -535,7 +535,7 @@ void BattleGroundAV::EventPlayerDefendsPoint(Player* player, BG_AV_Nodes node)
 {
     MANGOS_ASSERT(GetStatus() == STATUS_IN_PROGRESS);
 
-    BattleGroundTeamIndex teamIdx = GetTeamIndexByTeamId(player->GetBGTeam());
+    BattleGroundTeamIndex teamIdx = GetTeamIndexByTeamId(player->GetTeam());
 
     if (m_Nodes[node].Owner == BattleGroundAVTeamIndex(teamIdx) || m_Nodes[node].State != POINT_ASSAULTED)
         return;
@@ -581,7 +581,7 @@ void BattleGroundAV::EventPlayerDefendsPoint(Player* player, BG_AV_Nodes node)
 void BattleGroundAV::EventPlayerAssaultsPoint(Player* player, BG_AV_Nodes node)
 {
     // TODO implement quest 7101, 7081
-    BattleGroundTeamIndex teamIdx  = GetTeamIndexByTeamId(player->GetBGTeam());
+    BattleGroundTeamIndex teamIdx  = GetTeamIndexByTeamId(player->GetTeam());
     DEBUG_LOG("BattleGroundAV: player assaults node %i", node);
     if (m_Nodes[node].Owner == BattleGroundAVTeamIndex(teamIdx) || BattleGroundAVTeamIndex(teamIdx) == m_Nodes[node].TotalOwner)
         return;
@@ -671,7 +671,7 @@ WorldSafeLocsEntry const* BattleGroundAV::GetClosestGraveYard(Player *plr)
 {
     float x = plr->GetPositionX();
     float y = plr->GetPositionY();
-    BattleGroundAVTeamIndex teamIdx = GetAVTeamIndexByTeamId(plr->GetBGTeam());
+    BattleGroundAVTeamIndex teamIdx = GetAVTeamIndexByTeamId(plr->GetTeam());
     WorldSafeLocsEntry const* good_entry = NULL;
     if (GetStatus() == STATUS_IN_PROGRESS)
     {

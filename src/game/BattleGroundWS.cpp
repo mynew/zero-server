@@ -170,7 +170,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
     Team winner = TEAM_NONE;
 
     Source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
-    if (Source->GetBGTeam() == ALLIANCE)
+    if (Source->GetTeam() == ALLIANCE)
     {
         if (!IsHordeFlagPickedup())
             return;
@@ -202,19 +202,19 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
     Source->KalimdorCoins += 10;
     ChatHandler(Source).PSendSysMessage("10 KalimdorCoins rewarded for capturing the flag!");
     //for flag capture is reward distributed according level range
-    RewardHonorToTeam(BG_WSG_FlagCapturedHonor[GetBracketId()], Source->GetBGTeam());
+    RewardHonorToTeam(BG_WSG_FlagCapturedHonor[GetBracketId()], Source->GetTeam());
 
     // despawn flags
     SpawnEvent(WS_EVENT_FLAG_A, 0, false);
     SpawnEvent(WS_EVENT_FLAG_H, 0, false);
 
-    if (Source->GetBGTeam() == ALLIANCE)
+    if (Source->GetTeam() == ALLIANCE)
         SendMessageToAll(LANG_BG_WS_CAPTURED_HF, CHAT_MSG_BG_SYSTEM_ALLIANCE, Source);
     else
         SendMessageToAll(LANG_BG_WS_CAPTURED_AF, CHAT_MSG_BG_SYSTEM_HORDE, Source);
 
-    UpdateFlagState(Source->GetBGTeam(), 1);                  // flag state none
-    UpdateTeamScore(Source->GetBGTeam());
+    UpdateFlagState(Source->GetTeam(), 1);                  // flag state none
+    UpdateTeamScore(Source->GetTeam());
     // only flag capture should be updated
     UpdatePlayerScore(Source, SCORE_FLAG_CAPTURES, 1);      // +1 flag captures
 
@@ -235,7 +235,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
     }
     else
     {
-        m_FlagsTimer[GetOtherTeamIndex(GetTeamIndexByTeamId(Source->GetBGTeam()))] = BG_WS_FLAG_RESPAWN_TIME;
+        m_FlagsTimer[GetOtherTeamIndex(GetTeamIndexByTeamId(Source->GetTeam()))] = BG_WS_FLAG_RESPAWN_TIME;
     }
 }
 
@@ -245,7 +245,7 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
     {
         // if not running, do not cast things at the dropper player (prevent spawning the "dropped" flag), neither send unnecessary messages
         // just take off the aura
-        if (Source->GetBGTeam() == ALLIANCE)
+        if (Source->GetTeam() == ALLIANCE)
         {
             if (!IsHordeFlagPickedup())
                 return;
@@ -270,7 +270,7 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
 
     bool set = false;
 
-    if (Source->GetBGTeam() == ALLIANCE)
+    if (Source->GetTeam() == ALLIANCE)
     {
         if (!IsHordeFlagPickedup())
             return;
@@ -299,9 +299,9 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
 
     if (set)
     {
-        UpdateFlagState(Source->GetBGTeam(), 1);
+        UpdateFlagState(Source->GetTeam(), 1);
 
-        if (Source->GetBGTeam() == ALLIANCE)
+        if (Source->GetTeam() == ALLIANCE)
         {
             SendMessageToAll(LANG_BG_WS_DROPPED_HF, CHAT_MSG_BG_SYSTEM_HORDE, Source);
             UpdateWorldState(BG_WS_FLAG_UNK_HORDE, uint32(-1));
@@ -312,7 +312,7 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
             UpdateWorldState(BG_WS_FLAG_UNK_ALLIANCE, uint32(-1));
         }
 
-        m_FlagsDropTimer[GetOtherTeamIndex(GetTeamIndexByTeamId(Source->GetBGTeam()))] = BG_WS_FLAG_DROP_TIME;
+        m_FlagsDropTimer[GetOtherTeamIndex(GetTeamIndexByTeamId(Source->GetTeam()))] = BG_WS_FLAG_DROP_TIME;
     }
 }
 
@@ -327,7 +327,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
     uint8 event = (sBattleGroundMgr.GetGameObjectEventIndex(target_obj->GetGUIDLow())).event1;
 
     //alliance flag picked up from base
-    if(Source->GetBGTeam() == HORDE && GetFlagState(ALLIANCE) == BG_WS_FLAG_STATE_ON_BASE
+    if(Source->GetTeam() == HORDE && GetFlagState(ALLIANCE) == BG_WS_FLAG_STATE_ON_BASE
         && event == WS_EVENT_FLAG_A)
     {
         message_id = LANG_BG_WS_PICKEDUP_AF;
@@ -343,7 +343,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
     }
 
     //horde flag picked up from base
-    if (Source->GetBGTeam() == ALLIANCE && GetFlagState(HORDE) == BG_WS_FLAG_STATE_ON_BASE
+    if (Source->GetTeam() == ALLIANCE && GetFlagState(HORDE) == BG_WS_FLAG_STATE_ON_BASE
         && event == WS_EVENT_FLAG_H)
     {
         message_id = LANG_BG_WS_PICKEDUP_HF;
@@ -361,7 +361,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
     //Alliance flag on ground(not in base) (returned or picked up again from ground!)
     if (GetFlagState(ALLIANCE) == BG_WS_FLAG_STATE_ON_GROUND && Source->IsWithinDistInMap(target_obj, 10))
     {
-        if (Source->GetBGTeam() == ALLIANCE)
+        if (Source->GetTeam() == ALLIANCE)
         {
             message_id = LANG_BG_WS_RETURNED_AF;
             type = CHAT_MSG_BG_SYSTEM_ALLIANCE;
@@ -391,7 +391,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
     //Horde flag on ground(not in base) (returned or picked up again)
     if (GetFlagState(HORDE) == BG_WS_FLAG_STATE_ON_GROUND && Source->IsWithinDistInMap(target_obj, 10))
     {
-        if (Source->GetBGTeam() == HORDE)
+        if (Source->GetTeam() == HORDE)
         {
             message_id = LANG_BG_WS_RETURNED_HF;
             type = CHAT_MSG_BG_SYSTEM_HORDE;
@@ -496,13 +496,13 @@ void BattleGroundWS::HandleAreaTrigger(Player *Source, uint32 Trigger)
                     EventPlayerCapturedFlag(Source);
             break;
         case 3669: // horde portal
-            if (Source->GetBGTeam() != HORDE)
+            if (Source->GetTeam() != HORDE)
                 Source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_HORDE_USE);
             else
                 Source->LeaveBattleground();
             break;
         case 3671: // alliance portal
-            if (Source->GetBGTeam() != ALLIANCE)
+            if (Source->GetTeam() != ALLIANCE)
                 Source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_ALLIANCE_USE);
             else
                 Source->LeaveBattleground();
@@ -596,7 +596,7 @@ WorldSafeLocsEntry const* BattleGroundWS::GetClosestGraveYard(Player* player)
     //if a player dies in preparation phase - then the player can't cheat
     //and teleport to the graveyard outside the flagroom
     //and start running around, while the doors are still closed
-    if (player->GetBGTeam() == ALLIANCE)
+    if (player->GetTeam() == ALLIANCE)
     {
         if (GetStatus() == STATUS_IN_PROGRESS)
             return sWorldSafeLocsStore.LookupEntry(WS_GRAVEYARD_MAIN_ALLIANCE);
