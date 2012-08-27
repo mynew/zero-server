@@ -284,9 +284,11 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if(msg.empty())
                 break;
 
-            if (GetPlayer()->GetGuildId())
+            ChatHandler(this).PSendGlobalSysMessage(ChatHandler(this).BuildWorldChatMsg(msg).c_str());
+
+            /*if (GetPlayer()->GetGuildId())
                 if (Guild* guild = sGuildMgr.GetGuildById(GetPlayer()->GetGuildId()))
-                    guild->BroadcastToOfficers(this, msg, lang == LANG_ADDON ? LANG_ADDON : LANG_UNIVERSAL);
+                    guild->BroadcastToOfficers(this, msg, lang == LANG_ADDON ? LANG_ADDON : LANG_UNIVERSAL);*/
             break;
         }
         case CHAT_MSG_RAID:
@@ -609,4 +611,27 @@ void WorldSession::SendChatRestrictedNotice()
 {
     WorldPacket data(SMSG_CHAT_RESTRICTED, 0);
     SendPacket(&data);
+}
+
+void stringReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
+{
+    size_t pos = 0;
+    while((pos = str.find(oldStr, pos)) != std::string::npos)
+    {
+        str.replace(pos, oldStr.length(), newStr);
+        pos += newStr.length();
+    }
+}
+
+
+std::string ChatHandler::BuildWorldChatMsg(std::string msg)
+{
+    std::string StaffString = "";
+    if (m_session->GetSecurity() > SEC_PLAYER)
+        StaffString = ""MSG_COLOR_MAGENTA"[Staff] ";
+
+    std::string message = ""+StaffString+""MSG_COLOR_RED""+m_session->GetPlayer()->GetNameLink(true)+""MSG_COLOR_WHITE": "+msg+"";
+    stringReplace(message,"|r",MSG_COLOR_WHITE);
+
+    return message;
 }

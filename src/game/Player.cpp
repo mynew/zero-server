@@ -1095,39 +1095,42 @@ void Player::Update( uint32 update_diff, uint32 p_time )
     if(!IsInWorld())
         return;
 
+    if (GetBattleGround())
+        SetFFAPvP(true);
+
     TenSTimer += update_diff;
     if (TenSTimer > 10000)
     {
         uint32 HonorableKills = GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
         uint32 newrank = 0;
-        if (HonorableKills >= 100 && HonorableKills < 250)
-            newrank = 1;
-        else if (HonorableKills >= 250 && HonorableKills < 500)
-            newrank = 2;
-        else if (HonorableKills >= 500 && HonorableKills < 750)
-            newrank = 3;
-        else if (HonorableKills >= 750 && HonorableKills < 800)
-            newrank = 4;
-        else if (HonorableKills >= 800 && HonorableKills < 1000)
-            newrank = 5;
-        else if (HonorableKills >= 1000 && HonorableKills < 1500)
-            newrank = 6;
-        else if (HonorableKills >= 1500 && HonorableKills < 2000)
-            newrank = 7;
-        else if (HonorableKills >= 2000 && HonorableKills < 3000)
-            newrank = 8;
-        else if (HonorableKills >= 3000 && HonorableKills < 4000)
-            newrank = 9;
-        else if (HonorableKills >= 4000 && HonorableKills < 5000)
-            newrank = 10;
-        else if (HonorableKills >= 5000 && HonorableKills < 6000)
-            newrank = 11;
-        else if (HonorableKills >= 6000 && HonorableKills < 7000)
-            newrank = 12;
-        else if (HonorableKills >= 7000 && HonorableKills < 8000)
-            newrank = 13;
-        else if (HonorableKills >= 8000)
+        if (HonorableKills >= 16000)
             newrank = 14;
+        else if (HonorableKills >= 15000)
+            newrank = 13;
+        else if (HonorableKills >= 14000)
+            newrank = 12;
+        else if (HonorableKills >= 12000)
+            newrank = 11;
+        else if (HonorableKills >= 10000)
+            newrank = 10;
+        else if (HonorableKills >= 7500)
+            newrank = 9;
+        else if (HonorableKills >= 6500)
+            newrank = 8;
+        else if (HonorableKills >= 5500)
+            newrank = 7;
+        else if (HonorableKills >= 5000)
+            newrank = 6;
+        else if (HonorableKills >= 3000)
+            newrank = 5;
+        else if (HonorableKills >= 2500)
+            newrank = 4;
+        else if (HonorableKills >= 2000)
+            newrank = 3;
+        else if (HonorableKills >= 1000)
+            newrank = 2;
+        else if (HonorableKills >= 500)
+            newrank = 1;
 
         newrank += 4;
 
@@ -19340,6 +19343,8 @@ void Player::HandlePvPKill()
                     rankmod = 1.0f;
 
                 float attackerReward = rewardcoins*damagePct*killstreakMod*rankmod*rankdiffmod;
+                if (attackerReward > rewardcoins*4)
+                    attackerReward = rewardcoins*4;
 
                 if (pAttacker->GetSession()->GetPremium() == 2 || pAttacker->GetSession()->GetPremium() == 3)
                 {
@@ -19382,6 +19387,8 @@ void Player::HandlePvPKill()
                         if (healingPct > 1)
                             healingPct = 1.0f;
                         float healerReward = ((attackerReward * healingPct)*maxhealingPct)*killstreakMod;
+                        if (healerReward > rewardcoins*4)
+                            healerReward = rewardcoins*4;
 
                         if (pHealer->GetSession()->GetPremium() == 2 || pHealer->GetSession()->GetPremium() == 3)
                         {
