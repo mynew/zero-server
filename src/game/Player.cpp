@@ -1111,7 +1111,7 @@ void Player::Update( uint32 update_diff, uint32 p_time )
             newrank = 12;
         else if (HonorableKills >= 9500)
             newrank = 11;
-        else if (HonorableKills >= 60000)
+        else if (HonorableKills >= 6000)
             newrank = 10;
         else if (HonorableKills >= 3500)
             newrank = 9;
