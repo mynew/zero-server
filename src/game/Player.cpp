@@ -4130,7 +4130,9 @@ void Player::BuildPlayerRepop()
     if(GetCorpse())
     {
         sLog.outError("BuildPlayerRepop: player %s(%d) already has a corpse", GetName(), GetGUIDLow());
-        MANGOS_ASSERT(false);
+        ResurrectPlayer(1,false);
+        ChatHandler(this).PSendSysMessage("You are causing the server to crash, i hate you. (Print this and message LilleCarl and tell him what you just did.)");
+        //MANGOS_ASSERT(false);
     }
 
     // create a corpse and place it at the player's location
