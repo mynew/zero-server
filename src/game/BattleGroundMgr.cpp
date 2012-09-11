@@ -574,7 +574,7 @@ bool BattleGroundQueue::CheckNormalMatch(BattleGroundBracketId bracket_id, uint3
             if (!(*(itr_team[i]))->IsInvitedToBGInstanceGUID)
             {
                 m_SelectionPools[i].AddGroup(*(itr_team[i]), maxPlayers);
-                if (m_SelectionPools[i].GetPlayerCount() >= minPlayers * 2)
+                if (m_SelectionPools[i].GetPlayerCount() >= minPlayers)
                     break;
             }
         }
@@ -586,8 +586,8 @@ bool BattleGroundQueue::CheckNormalMatch(BattleGroundBracketId bracket_id, uint3
         return true;
 
     // If there are enough players to fill 2 teams with minplayerperteam count.
-    if (m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() + m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount() >= minPlayers * 2)
-        return true;
+    //if (m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() + m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount() >= minPlayers * 2)
+        //return true;
 
     // try to invite same number of players - this cycle may cause longer wait time even if there are enough players in queue, but we want ballanced bg
     uint32 j = BG_TEAM_ALLIANCE;
@@ -1272,7 +1272,7 @@ void BattleGroundMgr::SendToBattleGround(Player* pl, uint32 instanceId, BattleGr
     BattleGround* bg = GetBattleGround(instanceId, bgTypeId);
     if (bg)
     {
-        {
+        /*{
             Team GrpTeam = TEAM_NONE;
             if (Group *pGroup = pl->GetGroup())
             {
@@ -1302,7 +1302,7 @@ void BattleGroundMgr::SendToBattleGround(Player* pl, uint32 instanceId, BattleGr
                 pl->setFaction(29); // orc, and generic for horde
             else if (pl->GetBGTeam() == ALLIANCE)
                 pl->setFaction(55); // dwarf/gnome, and generic for alliance
-        }
+        }*/
 
         bg->UpdatePlayersCountByTeam(pl->GetBGTeam(), false); // Add here instead of in AddPlayer, because AddPlayer is not made until loading screen is finished. Which can cause unbalance in the system.
         uint32 mapid = bg->GetMapId();
