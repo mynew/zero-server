@@ -19347,13 +19347,13 @@ void Player::HandlePvPKill()
 
                 if (pAttacker->GetSession()->GetPremium() == 2 || pAttacker->GetSession()->GetPremium() == 3)
                 {
-                    pAttacker->KalimdorCoins += attackerReward*2;
+                    pAttacker->ModifyMoney((attackerReward*2)*10000);
                     ChatHandler(pAttacker).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attackerReward*2,GetNameLink().c_str());
 
                 }
                 else
                 {
-                    pAttacker->KalimdorCoins += attackerReward;
+                    pAttacker->ModifyMoney(attackerReward*10000);
                     ChatHandler(pAttacker).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attackerReward,GetNameLink().c_str());
                 }
 
@@ -19391,12 +19391,12 @@ void Player::HandlePvPKill()
 
                         if (pHealer->GetSession()->GetPremium() == 2 || pHealer->GetSession()->GetPremium() == 3)
                         {
-                            pHealer->KalimdorCoins += healerReward*2;
+                            pHealer->ModifyMoney((healerReward*2)*10000);
                             ChatHandler(pHealer).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,healerReward*2,pAttacker->GetNameLink().c_str());
                         }
                         else
                         {
-                            pHealer->KalimdorCoins += healerReward;
+                            pHealer->ModifyMoney(healerReward*10000);
                             ChatHandler(pHealer).PSendSysMessage("%s[PvP System]%s You got awarded %g coins for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,healerReward,pAttacker->GetNameLink().c_str());
                         }
                     }
