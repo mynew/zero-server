@@ -1448,10 +1448,6 @@ bool ChatHandler::HandleNpcAddVendorItemCommand(char* args)
     if (!ExtractOptUInt32(&args, incrtime, 0))
         return false;
 
-    uint32 kalimdorcoins;
-    if (!ExtractOptUInt32(&args, kalimdorcoins, 0))
-        return false;
-
     Creature* vendor = getSelectedCreature();
 
     uint32 vendor_entry = vendor ? vendor->GetEntry() : 0;
@@ -1462,12 +1458,11 @@ bool ChatHandler::HandleNpcAddVendorItemCommand(char* args)
         return false;
     }
 
-    sObjectMgr.AddVendorItem(vendor_entry,itemId,maxcount,incrtime,kalimdorcoins);
+    sObjectMgr.AddVendorItem(vendor_entry,itemId,maxcount,incrtime);
 
     ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemId);
 
     PSendSysMessage(LANG_ITEM_ADDED_TO_LIST,itemId,pProto->Name1,maxcount,incrtime);
-    PSendSysMessage("Kalimdorcoins %u",kalimdorcoins);
     return true;
 }
 
@@ -4903,29 +4898,6 @@ bool ChatHandler::HandleWaterwalkCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleCoinsCommand(char* /*args*/)
-{
-    Player* pPlayer = m_session->GetPlayer();
-    PSendSysMessage("%sYou have %s%g%s KalimdorCoins!",MSG_COLOR_WHITE,MSG_COLOR_RED,pPlayer->KalimdorCoins,MSG_COLOR_WHITE);
-    PSendSysMessage("%sYou are KalimdorRank %s%u%s - %s!",MSG_COLOR_WHITE,MSG_COLOR_RED,pPlayer->KalimdorRank-4,MSG_COLOR_WHITE, sWorld.GetKalimdorRankName(pPlayer->KalimdorRank-4,pPlayer->GetTeam()).c_str());
-    return true;
-}
-
-bool ChatHandler::HandleToggleBuyCommand(char* /*args*/)
-{
-    Player* pPlayer = m_session->GetPlayer();
-    if (pPlayer->BuyEnabled)
-    {
-        PSendSysMessage("You cannot buy KalimdorCoin items now.");
-        pPlayer->BuyEnabled = false;
-    }
-    else
-    {
-        PSendSysMessage("You can now buy KalimdorCoin items now.");
-        pPlayer->BuyEnabled = true;
-    }
-    return true;
-}
 
 bool ChatHandler::HandleGoldPriceCommand(char* args)
 {
@@ -4939,22 +4911,6 @@ bool ChatHandler::HandleGoldPriceCommand(char* args)
 
     WorldDatabase.PExecute("UPDATE item_template SET BuyPrice = %u,SellPrice = %u WHERE entry = %u",goldprice*10000,(goldprice*10000)/4,itemId);
     PSendSysMessage("Updated gold price to %u on item with id %u",goldprice*10000,itemId);
-    return true;
-}
-
-bool ChatHandler::HandleKalimdorPriceCommand(char* args)
-{
-    uint32 kalimdorprice;
-    if (!ExtractOptUInt32(&args, kalimdorprice, 0))
-        return false;
-
-    uint32 itemId;
-    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemId))
-        return false;
-
-    WorldDatabase.PExecute("UPDATE npc_vendor SET kalimdorcoins = %u WHERE item = %u",kalimdorprice,itemId);
-    WorldDatabase.PExecute("UPDATE npc_vendor_template SET kalimdorcoins = %u WHERE item = %u",kalimdorprice,itemId);
-    PSendSysMessage("Updated kalimdor price to %u on item with id %u",kalimdorprice,itemId);
     return true;
 }
 

@@ -364,8 +364,6 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
     VLastGuidCount    = 0;
     KillBounty        = 0;
     /* PvP System End */
-    KalimdorCoins     = 0.0f;
-    KalimdorRank      = 4;
     TenSTimer         = 0;
     BuyEnabled        = false;
     AutoQueue         = true;
@@ -1098,44 +1096,6 @@ void Player::Update( uint32 update_diff, uint32 p_time )
     TenSTimer += update_diff;
     if (TenSTimer > 10000)
     {
-        uint32 HonorableKills = GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
-        uint32 newrank = 0;
-        if (HonorableKills >= 30000)
-            newrank = 14;
-        else if (HonorableKills >= 21000)
-            newrank = 13;
-        else if (HonorableKills >= 15000)
-            newrank = 12;
-        else if (HonorableKills >= 9500)
-            newrank = 11;
-        else if (HonorableKills >= 6000)
-            newrank = 10;
-        else if (HonorableKills >= 3500)
-            newrank = 9;
-        else if (HonorableKills >= 2000)
-            newrank = 8;
-        else if (HonorableKills >= 1300)
-            newrank = 7;
-        else if (HonorableKills >= 750)
-            newrank = 6;
-        else if (HonorableKills >= 450)
-            newrank = 5;
-        else if (HonorableKills >= 200)
-            newrank = 4;
-        else if (HonorableKills >= 100)
-            newrank = 3;
-        else if (HonorableKills >= 50)
-            newrank = 2;
-        else if (HonorableKills >= 10)
-            newrank = 1;
-
-        newrank += 4;
-
-        if (newrank != KalimdorRank)
-        {
-            ChatHandler(this).PSendSysMessage("You are kalimdorrank %u - %s!",newrank-4, sWorld.GetKalimdorRankName(newrank-4,GetTeam()).c_str());
-        }
-        KalimdorRank = newrank;
         TenSTimer = 0;
 
         if (AutoQueue)
@@ -9738,7 +9698,7 @@ InventoryResult Player::CanUseItem( ItemPrototype const *pProto, bool not_loadin
         if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
             return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
 
-        if (not_loading && KalimdorRank < (uint8)pProto->RequiredHonorRank)
+        if (not_loading && GetHonorHighestRankInfo().rank < (uint8)pProto->RequiredHonorRank)
             return EQUIP_ERR_CANT_EQUIP_RANK;
 
         if( getLevel() < pProto->RequiredLevel )
@@ -14170,13 +14130,6 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder )
         }
     }
 
-    QueryResult* c_result = CharacterDatabase.PQuery("SELECT kalimdorcoins FROM character_custom WHERE guid = '%u'",GetGUIDLow());
-    if (c_result)
-    {
-        Field* c_fields = c_result->Fetch();
-        KalimdorCoins   = c_fields[0].GetFloat();
-    }
-
     return true;
 }
 
@@ -15124,8 +15077,6 @@ bool Player::_LoadHomeBind(QueryResult *result)
 
 void Player::SaveToDB()
 {
-    CharacterDatabase.PExecute("DELETE FROM character_custom WHERE guid = %u",GetGUIDLow());
-    CharacterDatabase.PExecute("INSERT INTO character_custom VALUES (%u,%f)",GetGUIDLow(),KalimdorCoins);
     // we should assure this: ASSERT((m_nextSave != sWorld.getConfig(CONFIG_UINT32_INTERVAL_SAVE)));
     // delay auto save at any saves (manual, in code, or autosave)
     m_nextSave = sWorld.getConfig(CONFIG_UINT32_INTERVAL_SAVE);
@@ -16971,10 +16922,8 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     }
 
     // not check level requiremnt for normal items (PvP related bonus items is another case)
-    if(pProto->RequiredHonorRank && (KalimdorRank < (uint8)pProto->RequiredHonorRank || getLevel() < pProto->RequiredLevel) )
+    if(pProto->RequiredHonorRank && (GetHonorRankInfo().rank < (uint8)pProto->RequiredHonorRank || getLevel() < pProto->RequiredLevel) )
     {
-        ChatHandler(this).PSendSysMessage("You need KalimdorRank %u %s to buy this item.",pProto->RequiredHonorRank-4, sWorld.GetKalimdorRankName(pProto->RequiredHonorRank-4,GetTeam()).c_str());
-        ChatHandler(this).PSendSysMessage("You have rank %u %s and can check it with .getrank",KalimdorRank-4, sWorld.GetKalimdorRankName(KalimdorRank-4,GetTeam()).c_str());
         SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
         return false;
     }
@@ -16987,18 +16936,6 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     if (GetMoney() < price)
     {
         SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
-        return false;
-    }
-
-    if (crItem->kalimdorcoins > 0 && !BuyEnabled)
-    {
-        ChatHandler(this).PSendSysMessage("This item costs %u KalimdorCoins, to buy it you must type .togglebuy",crItem->kalimdorcoins);
-        return false;
-    }
-
-    if (KalimdorCoins < crItem->kalimdorcoins)
-    {
-        ChatHandler(this).PSendSysMessage("You do not have enough KalimdorCoins to buy this item. You have %g and it costs %u",KalimdorCoins,crItem->kalimdorcoins);
         return false;
     }
 
@@ -17015,7 +16952,6 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         }
 
         ModifyMoney(-int32(price));
-        KalimdorCoins -= crItem->kalimdorcoins;
 
         pItem = StoreNewItem(dest, item, true);
     }
@@ -19329,15 +19265,15 @@ void Player::HandlePvPKill()
                     damagePct = 1.0f;
 
                 float rankdiffmod = 1.0f;
-                if (KalimdorRank > pAttacker->KalimdorRank)
+                if (GetHonorRankInfo().rank > pAttacker->GetHonorRankInfo().rank)
                 {
-                    rankdiffmod = float(KalimdorRank) - float(pAttacker->KalimdorRank);
+                    rankdiffmod = float(GetHonorRankInfo().rank) - float(pAttacker->GetHonorRankInfo().rank);
                     rankdiffmod = (rankdiffmod/10)+1.0f;
                     if (rankdiffmod > 2.4f || rankdiffmod < 1.0f)
                         rankdiffmod = 1.0f;
                 }
 
-                float rankmod = (pAttacker->KalimdorRank/10)+0.7f;
+                float rankmod = (pAttacker->GetHonorRankInfo().rank/10)+0.7f;
                 if (rankmod > 2.4f || rankmod < 1.0f)
                     rankmod = 1.0f;
 

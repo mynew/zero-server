@@ -710,13 +710,9 @@ ChatCommand * ChatHandler::getCommandTable()
         { "stable",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleStableCommand,              "", NULL },
         { "waterwalk",      SEC_GAMEMASTER,     false, &ChatHandler::HandleWaterwalkCommand,           "", NULL },
         { "goldprice",      SEC_GAMEMASTER,     false, &ChatHandler::HandleGoldPriceCommand,           "", NULL },
-        { "kalimdorprice",  SEC_GAMEMASTER,     false, &ChatHandler::HandleKalimdorPriceCommand,       "", NULL },
         { "rankrequirement",SEC_GAMEMASTER,     false, &ChatHandler::HandleRankReqCommand,             "", NULL },
-        { "coins",          SEC_PLAYER,         true,  &ChatHandler::HandleCoinsCommand,               "", NULL },
         { "queue",          SEC_PLAYER,         true,  &ChatHandler::HandleAutoQueueToggleCommand,     "", NULL },
         { "selectqueue",    SEC_PLAYER,         true,  &ChatHandler::HandleAutoQueueMapCommand,        "", NULL },
-        { "getrank",        SEC_PLAYER,         true,  &ChatHandler::HandleCoinsCommand,               "", NULL },
-        { "togglebuy",      SEC_PLAYER,         true,  &ChatHandler::HandleToggleBuyCommand,           "", NULL },
         { "getpremium",     SEC_PLAYER,         true,  &ChatHandler::HandleGetPremiumCommand,          "", NULL },
         { "quit",           SEC_CONSOLE,        true,  &ChatHandler::HandleQuitCommand,                "", NULL },
 

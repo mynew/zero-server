@@ -576,10 +576,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleRepairitemsCommand(char* args);
         bool HandleStableCommand(char* args);
         bool HandleWaterwalkCommand(char* args);
-        bool HandleCoinsCommand(char* args);
-        bool HandleToggleBuyCommand(char* args);
         bool HandleGoldPriceCommand(char* args);
-        bool HandleKalimdorPriceCommand(char* args);
         bool HandleRankReqCommand(char* args);
         bool HandleAutoQueueToggleCommand(char* args);
         bool HandleAutoQueueMapCommand(char* args);
