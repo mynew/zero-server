@@ -328,7 +328,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->RequiredSkill;
         data << pProto->RequiredSkillRank;
         data << pProto->RequiredSpell;
-        data << 0;
+        data << pProto->RequiredHonorRank;
         data << pProto->RequiredCityRank;
         data << pProto->RequiredReputationFaction;
         data << (pProto->RequiredReputationFaction > 0  ? pProto->RequiredReputationRank : 0 );  // send value only if reputation faction id setted ( needed for some items)
