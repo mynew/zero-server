@@ -4157,24 +4157,10 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
 
     if( m_spellInfo->rangeIndex == 1)                       //self range
     {
-        float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx]));
-
-        // before caster
-        float fx, fy, fz;
-        unitTarget->GetClosePoint(fx, fy, fz, unitTarget->GetObjectBoundingRadius(), dis);
-        float ox, oy, oz;
-        unitTarget->GetPosition(ox, oy, oz);
-
-        float fx2, fy2, fz2;                                // getObjectHitPos overwrite last args in any result case
-        if(VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(unitTarget->GetMapId(), ox,oy,oz+0.5f, fx,fy,oz+0.5f,fx2,fy2,fz2, -0.5f))
-        {
-            fx = fx2;
-            fy = fy2;
-            fz = fz2;
-            unitTarget->UpdateAllowedPositionZ(fx, fy, fz);
-        }
-
-        unitTarget->NearTeleportTo(fx, fy, fz+0.5f, unitTarget->GetOrientation(), unitTarget == m_caster);
+        float spellDist = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx]));
+        WorldLocation destLoc;
+        unitTarget->GetFirstCollisionPosition(destLoc, spellDist, 0.0f);
+        unitTarget->NearTeleportTo(destLoc.coord_x, destLoc.coord_y, (destLoc.coord_z + unitTarget->GetObjectScale()), unitTarget->GetOrientation(), unitTarget == m_caster);
     }
 }
 
