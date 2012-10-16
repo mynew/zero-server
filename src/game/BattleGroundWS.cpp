@@ -200,7 +200,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
     }
 
     Source->ModifyMoney(100000);
-    ChatHandler(Source).PSendSysMessage("10 KalimdorCoins rewarded for capturing the flag!");
+    ChatHandler(Source).PSendSysMessage("10 gold rewarded for capturing the flag!");
     //for flag capture is reward distributed according level range
     RewardHonorToTeam(BG_WSG_FlagCapturedHonor[GetBracketId()], Source->GetBGTeam());
 
@@ -370,7 +370,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
             PlaySoundToAll(BG_WS_SOUND_FLAG_RETURNED);
             UpdatePlayerScore(Source, SCORE_FLAG_RETURNS, 1);
             Source->ModifyMoney(50000);
-            ChatHandler(Source).PSendSysMessage("5 KalimdorCoins rewarded for returning the flag!");
+            ChatHandler(Source).PSendSysMessage("5 gold rewarded for returning the flag!");
         }
         else
         {
@@ -400,7 +400,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
             PlaySoundToAll(BG_WS_SOUND_FLAG_RETURNED);
             UpdatePlayerScore(Source, SCORE_FLAG_RETURNS, 1);
             Source->ModifyMoney(50000);
-            ChatHandler(Source).PSendSysMessage("5 KalimdorCoins rewarded for returning the flag!");
+            ChatHandler(Source).PSendSysMessage("5 gold rewarded for returning the flag!");
         }
         else
         {
