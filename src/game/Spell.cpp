@@ -5181,9 +5181,15 @@ SpellCastResult Spell::CheckItems()
         if (m_CastItem->IsInTrade())
             return SPELL_FAILED_ITEM_GONE;
 
-        uint32 itemid = m_CastItem->GetEntry();
-        if( !p_caster->HasItemCount(itemid, 1) )
-            return SPELL_FAILED_ITEM_NOT_READY;
+        if (m_CastItem->GetEntry())
+        {
+            uint32 itemid = m_CastItem->GetEntry();
+            if( !p_caster->HasItemCount(itemid, 1) )
+                return SPELL_FAILED_ITEM_NOT_READY;
+        }
+        else
+            return SPELL_CAST_OK;
+        
 
         ItemPrototype const *proto = m_CastItem->GetProto();
         if(!proto)
