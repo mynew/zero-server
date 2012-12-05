@@ -2126,3 +2126,9 @@ bool ChatHandler::HandleSetViewCommand(char* /*args*/)
 
     return true;
 }
+
+bool ChatHandler::Maintenance(char* /*args*/)
+{
+    sWorld.ServerMaintenanceStart();
+    PSendSysMessage("Did maintenance");
+}
